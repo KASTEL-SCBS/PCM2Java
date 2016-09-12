@@ -1,8 +1,7 @@
 package edu.kit.ipd.sdq.mdsd.pcm2java.generator
 
 import edu.kit.ipd.sdq.commons.ecore2txt.generator.AbstractEcore2TxtGenerator
-import edu.kit.ipd.sdq.vitruvius.framework.util.bridges.EcoreBridge
-import edu.kit.ipd.sdq.vitruvius.framework.util.datatypes.Triple
+import tools.vitruv.framework.util.bridges.EcoreBridge
 import java.util.ArrayList
 import java.util.Collections
 import java.util.HashSet
@@ -21,8 +20,8 @@ import org.palladiosimulator.pcm.repository.OperationSignature
 import static edu.kit.ipd.sdq.mdsd.pcm2java.generator.PCM2JavaGeneratorConstants.*
 import static edu.kit.ipd.sdq.mdsd.pcm2java.generator.PCM2JavaTargetNameUtil.*
 import static edu.kit.ipd.sdq.mdsd.pcm2java.generator.PCMUtil.*
-import org.palladiosimulator.pcm.repository.OperationRequiredRole
 import org.palladiosimulator.pcm.repository.Interface
+import org.eclipse.internal.xtend.util.Triplet
 
 class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 		
@@ -40,18 +39,18 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 	}
 
 	override generateContentsFromResource(Resource inputResource) {
-		val contentsForFolderAndFileNames = new ArrayList<Triple<String,String,String>>()
+		val contentsForFolderAndFileNames = new ArrayList<Triplet<String,String,String>>()
 		generateAndAddContents(inputResource, contentsForFolderAndFileNames)
 		return contentsForFolderAndFileNames
 	}
 	
-	private def void generateAndAddContents(Resource inputResource, List<Triple<String,String,String>> contentsForFolderAndFileNames) {
+	private def void generateAndAddContents(Resource inputResource, List<Triplet<String,String,String>> contentsForFolderAndFileNames) {
 		for (element : EcoreBridge.getAllContents(inputResource)) {
 			val content = generateContent(element)
 			if (!content?.equals("")) {
 				val folderName = getTargetName(element, false)
 				val fileName = getTargetFileName(element) + getTargetFileExt()
-				val contentAndFileName = new Triple<String,String,String>(content,folderName,fileName)
+				val contentAndFileName = new Triplet<String,String,String>(content,folderName,fileName)
 				contentsForFolderAndFileNames.add(contentAndFileName)
 			}
 		}

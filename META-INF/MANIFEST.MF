@@ -13,7 +13,6 @@ Require-Bundle: com.google.guava,
  org.eclipse.xtext,
  org.eclipse.emf.mwe2.launch,
  org.palladiosimulator.pcm,
- edu.kit.ipd.sdq.vitruvius.framework.util,
  org.eclipse.ui,
  org.eclipse.core.resources,
  org.eclipse.emf.ecore,
@@ -24,5 +23,5 @@ Require-Bundle: com.google.guava,
  org.eclipse.jface;visibility:=reexport,
  org.eclipse.ui.workbench,
  com.google.inject,
- edu.kit.ipd.sdq.vitruvius.framework.util
+ tools.vitruv.framework.util
 Export-Package: edu.kit.ipd.sdq.mdsd.pcm2java.generator

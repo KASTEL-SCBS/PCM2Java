@@ -22,6 +22,9 @@ import static edu.kit.ipd.sdq.mdsd.pcm2java.generator.PCM2JavaTargetNameUtil.*
 import static edu.kit.ipd.sdq.mdsd.pcm2java.generator.PCMUtil.*
 import org.palladiosimulator.pcm.repository.Interface
 import org.eclipse.internal.xtend.util.Triplet
+import org.palladiosimulator.pcm.repository.InnerDeclaration
+import org.palladiosimulator.pcm.repository.PrimitiveDataType
+import org.palladiosimulator.pcm.repository.CollectionDataType
 
 class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 		
@@ -63,34 +66,60 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 	
 	def dispatch String generateContent(CompositeDataType dataType) {
 		val importsAndClassifierHead = generateImportsAndInterfaceHead(dataType)
-		// FIXME MK generate fields in composite data types
+		val fields = generateFields(dataType)
 		// FIXME MK generate constructors in composite data types
 		return importsAndClassifierHead + '''{
-	// FIXME MK generate fields in composite data types
+
+	«fields»
+	
 	// FIXME MK generate constructors in composite data types
 }'''
+	}
+		
+	private def generateFields(CompositeDataType dataType) '''«
+	FOR declaration : dataType.innerDeclaration_CompositeDataType
+		SEPARATOR '
+'
+		»private «declaration.getInnerDeclarationClassName» «declaration.entityName.toFirstLower»;«
+	ENDFOR»''' 
+
+	/**
+	 * Returns the name of the class declared in a InnerDeclaration as String.
+	 * If it's a primitive type the string is in lower case,
+	 * otherwise the name exact name of the class will be returned.
+	 * 
+	 * TODO: Move to PCM Helper class
+	 */
+	private def String getInnerDeclarationClassName(InnerDeclaration declaration){
+		val dataType = declaration.datatype_InnerDeclaration
+		if (dataType instanceof PrimitiveDataType) {
+			val type = (dataType as PrimitiveDataType).type.toString
+			switch type {
+				case "BOOL" : return "boolean"
+				case "STRING" : return "String"
+				default : return type.toLowerCase
+			}
+		}
+		if (dataType instanceof CollectionDataType) {
+			return (dataType as CollectionDataType).entityName.toFirstUpper
+		} 
+		if (dataType instanceof CompositeDataType) {
+			return (dataType as CompositeDataType).entityName.toFirstUpper
+		}
+		// FIXME Throw exception if dataType is not a Primitive-, Collection-, or CompositeDataType?
 	}
 	
 	def dispatch String generateContent(OperationInterface iface) {
 		val importsAndClassifierHead = generateImportsAndInterfaceHead(iface)
-		val methodDeclarations = generateMethodDeclarations(iface)
+		val implementsRelations = generateImplementsRelations(iface)
+		val methodDeclarations = generateMethodDeclarations(iface.signatures__OperationInterface)
 		// FIXME MK support all cases of method declarations for service signatures in interfaces
-		return importsAndClassifierHead + '''{
+		return importsAndClassifierHead + implementsRelations + '''{
 	«methodDeclarations»
 	// FIXME MK support all cases of method declarations for service signatures in interfaces
 }'''
 	}
-	
-	private def generateMethodDeclarations(OperationInterface iface) {
-		var declarations = generateMethodDeclarations(iface.signatures__OperationInterface).toString
-		val arr = new ArrayList<OperationInterface>
-		arr.add(iface)
-		for (parentIface : getInheritedOperationInterfaces(arr)) {
-			declarations += generateMethodDeclarations(parentIface.signatures__OperationInterface)
-		}
-		return declarations
-	}
-	
+		
 	def generateMethodDeclarations(Iterable<OperationSignature> operationSignatures) '''«
 		
 		FOR operationSignature : operationSignatures 
@@ -101,6 +130,14 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 			»«generateMethodDeclarationWithoutSemicolon(operationSignature)»«
 		ENDFOR 
 	»'''
+	
+	private def generateImplementsRelations(OperationInterface iface) '''«
+	FOR providedInterface : getInheritedOperationInterfaces(iface)
+		BEFORE 'implements '
+		SEPARATOR ', '
+		AFTER ' '
+		»«providedInterface.entityName.toFirstUpper»«
+	ENDFOR»'''
 	
 	private def String generateMethodDeclarationWithoutSemicolon(OperationSignature operationSignature) {
 				val returnType = getTargetFileName(operationSignature.returnType__OperationSignature)
@@ -131,7 +168,7 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 	
 	private def generateMethodDefinitions(BasicComponent bc) {
 		var methodDefinitions = generateMethodDefinitions(bc.providedRoles_InterfaceProvidingEntity.filter(OperationProvidedRole).map[it.providedInterface__OperationProvidedRole].map[it.signatures__OperationInterface].flatten).toString
-		val inheritedInterfaces = getInheritedOperationInterfaces(getProvidedInterfaces(bc))
+		val inheritedInterfaces = getInheritedOperationInterfaces(bc)
 		for (iface : inheritedInterfaces) {
 			methodDefinitions += generateMethodDefinitions(iface.signatures__OperationInterface)
 		}
@@ -156,8 +193,6 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 		ENDFOR 
 	»
 	'''
-
-	
 	
 	private def generateImplementsRelations(BasicComponent bc) '''«
 	FOR providedInterface : getProvidedInterfaces(bc)
@@ -260,19 +295,26 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 	public «classifierType» «classifierName.toFirstUpper» '''
 
 	// TODO: Move to PCM helper class.
-	private def Iterable<OperationInterface> getInheritedOperationInterfaces(Iterable<OperationInterface> ifaces) {
+	private def Iterable<OperationInterface> getInheritedOperationInterfaces(OperationInterface iface) {
 		val inheritedOperationInterfaces = new ArrayList<OperationInterface>
 		val toIterate = new ArrayList<Interface>
-		for (Interface iface : ifaces) {
-			toIterate.addAll(iface.parentInterfaces__Interface)
-		}
+		toIterate.addAll(iface.parentInterfaces__Interface)
 		while (!toIterate.isEmpty) {
-			val iface = toIterate.get(0)
-			toIterate.addAll(iface.parentInterfaces__Interface)
-			if (iface instanceof OperationInterface) {
-				inheritedOperationInterfaces.add(iface)
+			val iterator = toIterate.get(0)
+			toIterate.addAll(iterator.parentInterfaces__Interface)
+			if (iterator instanceof OperationInterface) {
+				inheritedOperationInterfaces.add(iterator)
 			}
 			toIterate.remove(0)
+		}
+		return inheritedOperationInterfaces
+	}
+	
+	// TODO: Move to PCM helper class.
+	private def Iterable<OperationInterface> getInheritedOperationInterfaces(BasicComponent bc) {
+		val inheritedOperationInterfaces = new ArrayList<OperationInterface>
+		for (iface : getProvidedInterfaces(bc)) {
+			inheritedOperationInterfaces.addAll(getInheritedOperationInterfaces(iface))
 		}
 		return inheritedOperationInterfaces
 	}

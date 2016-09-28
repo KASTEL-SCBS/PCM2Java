@@ -65,28 +65,30 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 	}
 	
 	def dispatch String generateContent(CompositeDataType dataType) {
+		// FIXME support inheritance in composite data types
 		val importsAndClassifierHead = generateImportsAndInterfaceHead(dataType)
 		val fields = generateFields(dataType)
-		// FIXME MK generate constructors in composite data types
+		val constructor = generateConstructor(dataType)
 		return importsAndClassifierHead + '''{
-
+	//FIXME support inheritance in composite data types
 	«fields»
 	
-	// FIXME MK generate constructors in composite data types
+	«constructor»
+	
 }'''
 	}
 		
 	private def generateFields(CompositeDataType dataType) '''«
 	FOR declaration : dataType.innerDeclaration_CompositeDataType
+		BEFORE '
+'
 		SEPARATOR '
 '
 		»private «declaration.getInnerDeclarationClassName» «declaration.entityName.toFirstLower»;«
 	ENDFOR»''' 
 
 	/**
-	 * Returns the name of the class declared in a InnerDeclaration as String.
-	 * If it's a primitive type the string is in lower case,
-	 * otherwise the name exact name of the class will be returned.
+	 * Returns the type of the DataType that is contained in the given InnerDeclaration as String.
 	 * 
 	 * TODO: Move to PCM Helper class
 	 */
@@ -109,6 +111,22 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 		// FIXME Throw exception if dataType is not a Primitive-, Collection-, or CompositeDataType?
 	}
 	
+	private def String generateConstructor(CompositeDataType dataType) {
+		var nonPrimitiveFields = ""
+		for (declaration : dataType.innerDeclaration_CompositeDataType) {
+			if (declaration.datatype_InnerDeclaration instanceof CollectionDataType || 
+				declaration.datatype_InnerDeclaration instanceof CompositeDataType) {
+				nonPrimitiveFields += '''this.«declaration.entityName.toFirstLower» = new «declaration.innerDeclarationClassName»()
+				'''
+			}
+		}
+		return '''
+		public «dataType.entityName.toFirstUpper»() {
+			// TODO: Implement and verify auto-generated constructor.
+			«nonPrimitiveFields»
+		}'''
+	}
+		
 	def dispatch String generateContent(OperationInterface iface) {
 		val importsAndClassifierHead = generateImportsAndInterfaceHead(iface)
 		val implementsRelations = generateImplementsRelations(iface)
@@ -208,10 +226,13 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 	ENDFOR»''' 
 	
 	private def generateConstructor(BasicComponent bc) '''
-	public «bc.entityName.toFirstUpper»() {
-		// TODO: implement and verify auto-generated constructor. Add parameters to constructor calls if necessary.
+	public «bc.entityName.toFirstUpper»(«
+	FOR iface2 : getRequiredInterfaces(bc)
+		»«iface2.entityName.toFirstUpper» «iface2.entityName.toFirstLower
+	»«ENDFOR») {
+		// TODO: implement and verify auto-generated constructor.
 	«FOR iface : getRequiredInterfaces(bc)
-		»    this.«iface.entityName.toFirstLower» = new «iface.entityName.toFirstUpper»();
+		»    this.«iface.entityName.toFirstLower» = «iface.entityName.toFirstLower»;
     «ENDFOR»
 	}'''
 	

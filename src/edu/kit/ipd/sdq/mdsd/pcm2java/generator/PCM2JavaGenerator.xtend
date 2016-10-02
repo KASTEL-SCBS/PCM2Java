@@ -3,7 +3,6 @@ package edu.kit.ipd.sdq.mdsd.pcm2java.generator
 import edu.kit.ipd.sdq.commons.ecore2txt.generator.AbstractEcore2TxtGenerator
 import tools.vitruv.framework.util.bridges.EcoreBridge
 import java.util.ArrayList
-import java.util.Collections
 import java.util.HashSet
 import java.util.List
 import org.eclipse.emf.ecore.EObject
@@ -65,18 +64,25 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 	}
 	
 	def dispatch String generateContent(CompositeDataType dataType) {
-		// FIXME support inheritance in composite data types
-		val importsAndClassifierHead = generateImportsAndInterfaceHead(dataType)
+		// FIXME full support for collection data types as inner data types
+		val importsAndClassifierHead = generateImportsAndClassHead(dataType)
+		val extendsRelations = generateExtendsRelation(dataType)
 		val fields = generateFields(dataType)
 		val constructor = generateConstructor(dataType)
-		return importsAndClassifierHead + '''{
-	//FIXME support inheritance in composite data types
+		return importsAndClassifierHead + extendsRelations + '''{
+	// FIXME full support for collection data types as inner data types
 	«fields»
 	
 	«constructor»
 	
 }'''
 	}
+		
+	private def generateExtendsRelation(CompositeDataType dataType) '''«
+	FOR parent : dataType.parentType_CompositeDataType
+		BEFORE 'extends '
+		»«parent.entityName.toFirstUpper» «
+	ENDFOR»'''	
 		
 	private def generateFields(CompositeDataType dataType) '''«
 	FOR declaration : dataType.innerDeclaration_CompositeDataType
@@ -116,7 +122,7 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 		for (declaration : dataType.innerDeclaration_CompositeDataType) {
 			if (declaration.datatype_InnerDeclaration instanceof CollectionDataType || 
 				declaration.datatype_InnerDeclaration instanceof CompositeDataType) {
-				nonPrimitiveFields += '''this.«declaration.entityName.toFirstLower» = new «declaration.innerDeclarationClassName»()
+				nonPrimitiveFields += '''this.«declaration.entityName.toFirstLower» = new «declaration.innerDeclarationClassName»();
 				'''
 			}
 		}
@@ -129,14 +135,14 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 		
 	def dispatch String generateContent(OperationInterface iface) {
 		val importsAndClassifierHead = generateImportsAndInterfaceHead(iface)
-		val implementsRelations = generateImplementsRelations(iface)
+		val extendsRelations = generateExtendsRelations(iface)
 		val methodDeclarations = generateMethodDeclarations(iface.signatures__OperationInterface)
 		// FIXME MK support all cases of method declarations for service signatures in interfaces
-		return importsAndClassifierHead + implementsRelations + '''{
+		return importsAndClassifierHead + extendsRelations + '''{
 	«methodDeclarations»
 	// FIXME MK support all cases of method declarations for service signatures in interfaces
 }'''
-	}
+	}	
 		
 	def generateMethodDeclarations(Iterable<OperationSignature> operationSignatures) '''«
 		
@@ -149,9 +155,13 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 		ENDFOR 
 	»'''
 	
-	private def generateImplementsRelations(OperationInterface iface) '''«
+	private def String generateImportsAndInterfaceHead(NamedElement namedElement) {
+		return generateImportsAndClassifierHead(namedElement,"interface")
+	}
+	
+	private def generateExtendsRelations(OperationInterface iface) '''«
 	FOR providedInterface : getInheritedOperationInterfaces(iface)
-		BEFORE 'implements '
+		BEFORE 'extends '
 		SEPARATOR ', '
 		AFTER ' '
 		»«providedInterface.entityName.toFirstUpper»«
@@ -238,15 +248,19 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 	
 	private def Iterable<? extends EObject> getTypesUsedInSignaturesOfProvidedServices(InterfaceProvidingEntity ipe) {
 		val usedTypes = new HashSet<EObject>()
-		for (providedSignature : getProvidedInterfaces(ipe).map[it.signatures__OperationInterface].flatten) {
-			usedTypes.addAll(getDataTypesToImport(#{providedSignature.returnType__OperationSignature}))
-			usedTypes.addAll(getDataTypesToImport(providedSignature.parameters__OperationSignature.map[it.dataType__Parameter]))
+		for (providedInterface : getProvidedInterfaces(ipe)) {
+			usedTypes.addAll(getTypesUsedInSignaturesOfProvidedServices(providedInterface))
 		}
 		return usedTypes
 	}
 	
-	private def String generateImportsAndInterfaceHead(NamedElement namedElement) {
-		return generateImportsAndClassifierHead(namedElement,"interface")
+	private def Iterable<? extends EObject> getTypesUsedInSignaturesOfProvidedServices(OperationInterface iface) {
+		val usedTypes =  new HashSet<EObject>
+		for (providedSignature : iface.signatures__OperationInterface) {
+			usedTypes.addAll(getDataTypesToImport(#{providedSignature.returnType__OperationSignature}))
+			usedTypes.addAll(getDataTypesToImport(providedSignature.parameters__OperationSignature.map[it.dataType__Parameter]))
+		}
+		return usedTypes
 	}
 	
 	private def String generateImportsAndClassHead(NamedElement namedElement) {
@@ -292,8 +306,9 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 	}
 	
 	private def dispatch Iterable<? extends EObject> getElementsToImport(OperationInterface iface) {
-		// FIXME MK generate imports for interfaces
-		return Collections.emptyList
+		val elementsToImport = new ArrayList<EObject>
+		elementsToImport.addAll(getTypesUsedInSignaturesOfProvidedServices(iface))
+		return elementsToImport
 	}
 	
 	private def dispatch Iterable<? extends EObject> getElementsToImport(BasicComponent bc) {

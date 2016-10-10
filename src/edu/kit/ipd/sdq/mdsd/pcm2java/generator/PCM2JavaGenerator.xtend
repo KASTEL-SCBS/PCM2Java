@@ -69,12 +69,14 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 		val extendsRelations = generateExtendsRelation(dataType)
 		val fields = generateFields(dataType)
 		val constructor = generateConstructor(dataType)
+		val methods = generateMethods(dataType)
 		return importsAndClassifierHead + extendsRelations + '''{
 	// FIXME full support for collection data types as inner data types
 	«fields»
 	
 	«constructor»
 	
+	«methods»
 }'''
 	}
 		
@@ -99,7 +101,10 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 	 * TODO: Move to PCM Helper class
 	 */
 	private def String getInnerDeclarationClassName(InnerDeclaration declaration){
-		val dataType = declaration.datatype_InnerDeclaration
+		return getClassName(declaration.datatype_InnerDeclaration)
+	}
+	
+	private def String getClassName(DataType dataType) {
 		if (dataType instanceof PrimitiveDataType) {
 			val type = (dataType as PrimitiveDataType).type.toString
 			switch type {
@@ -109,7 +114,12 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 			}
 		}
 		if (dataType instanceof CollectionDataType) {
-			return (dataType as CollectionDataType).entityName.toFirstUpper
+			val innerType = (dataType as CollectionDataType).innerType_CollectionDataType
+			if (innerType instanceof CollectionDataType) {
+				return "Iterable<" + (innerType as NamedElement).entityName + ">"
+			} else {
+				return "Iterable<" + innerType.getClassName + ">"
+			}
 		} 
 		if (dataType instanceof CompositeDataType) {
 			return (dataType as CompositeDataType).entityName.toFirstUpper
@@ -132,6 +142,25 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 			«nonPrimitiveFields»
 		}'''
 	}
+	
+	private def generateMethods(CompositeDataType dataType) '''«
+		FOR declaration : dataType.innerDeclaration_CompositeDataType
+			SEPARATOR '
+'			AFTER '
+'		»«generateGetterSetter(declaration)
+		»«ENDFOR
+	»'''
+	
+	private def generateGetterSetter(InnerDeclaration declaration) '''«
+	»public «declaration.innerDeclarationClassName» get«declaration.entityName.toFirstUpper»() {
+«   »    return «declaration.entityName»;
+«   »}
+
+«
+	»public void set«declaration.entityName.toFirstUpper»(«declaration.innerDeclarationClassName» «declaration.entityName») {
+«   »    this.«declaration.entityName» = «declaration.entityName»;
+«   »}
+'''
 		
 	def dispatch String generateContent(OperationInterface iface) {
 		val importsAndClassifierHead = generateImportsAndInterfaceHead(iface)
@@ -148,8 +177,7 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 		
 		FOR operationSignature : operationSignatures 
 			SEPARATOR ';
-'
-			AFTER ';
+'			AFTER ';
 '
 			»«generateMethodDeclarationWithoutSemicolon(operationSignature)»«
 		ENDFOR 
@@ -302,7 +330,12 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 	
 	private def Iterable<? extends EObject> getDataTypesToImport(Iterable<DataType> dataTypes) {
 		// FIXME MK get util classes to import for collection data types
-		dataTypes.filter(CompositeDataType)
+		val dataTypesToImport = new ArrayList<EObject>
+		dataTypesToImport.addAll(dataTypes.filter(CompositeDataType))
+		if (dataTypes.filter(CollectionDataType).length != 0) {
+	//		dataTypesToImport.add(??) FIXME!
+		}
+		return dataTypesToImport
 	}
 	
 	private def dispatch Iterable<? extends EObject> getElementsToImport(OperationInterface iface) {

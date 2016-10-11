@@ -70,6 +70,11 @@ class PCM2JavaTargetNameUtil {
 	static def dispatch String getTargetFileName(PrimitiveDataType pdt) {
 		switch pdt.getType() {
 			case PrimitiveTypeEnum::STRING : "String"
+			case PrimitiveTypeEnum::INT: "int"
+			case PrimitiveTypeEnum::BOOL: "boolean"
+			case PrimitiveTypeEnum::DOUBLE: "double"
+			case PrimitiveTypeEnum::BYTE: "byte"
+			case PrimitiveTypeEnum::CHAR: "char"
 			default : ""
 		}
 	}

@@ -24,6 +24,7 @@ import org.eclipse.internal.xtend.util.Triplet
 import org.palladiosimulator.pcm.repository.InnerDeclaration
 import org.palladiosimulator.pcm.repository.PrimitiveDataType
 import org.palladiosimulator.pcm.repository.CollectionDataType
+import org.palladiosimulator.pcm.repository.impl.CollectionDataTypeImpl
 
 class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 		
@@ -104,27 +105,24 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 		return getClassName(declaration.datatype_InnerDeclaration)
 	}
 	
-	private def String getClassName(DataType dataType) {
-		if (dataType instanceof PrimitiveDataType) {
-			val type = (dataType as PrimitiveDataType).type.toString
-			switch type {
-				case "BOOL" : return "boolean"
-				case "STRING" : return "String"
-				default : return type.toLowerCase
+	private dispatch def String getClassName(PrimitiveDataType dataType) {
+		return getTargetFileName(dataType)
+	}
+	
+	private dispatch def String getClassName(CollectionDataType dataType) {
+		val innerType = dataType.innerType_CollectionDataType
+			switch innerType {
+				case CollectionDataType: return "Iterable<" + (innerType as NamedElement).entityName + ">"
+				default: return "Iterable<" + innerType.getClassName + ">"
 			}
-		}
-		if (dataType instanceof CollectionDataType) {
-			val innerType = (dataType as CollectionDataType).innerType_CollectionDataType
-			if (innerType instanceof CollectionDataType) {
-				return "Iterable<" + (innerType as NamedElement).entityName + ">"
-			} else {
-				return "Iterable<" + innerType.getClassName + ">"
-			}
-		} 
-		if (dataType instanceof CompositeDataType) {
-			return (dataType as CompositeDataType).entityName.toFirstUpper
-		}
-		// FIXME Throw exception if dataType is not a Primitive-, Collection-, or CompositeDataType?
+	}
+	
+	private dispatch def String getClassName(CompositeDataType dataType) {
+		return dataType.entityName.toFirstUpper
+	} 
+	
+	private dispatch def String getClassName(NamedElement element) {
+		throw new UnsupportedOperationException("Get class name for " + element.entityName)
 	}
 	
 	private def String generateConstructor(CompositeDataType dataType) {
@@ -332,8 +330,8 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 		// FIXME MK get util classes to import for collection data types
 		val dataTypesToImport = new ArrayList<EObject>
 		dataTypesToImport.addAll(dataTypes.filter(CompositeDataType))
-		if (dataTypes.filter(CollectionDataType).length != 0) {
-	//		dataTypesToImport.add(??) FIXME!
+		if (dataTypes.filter(CollectionDataTypeImpl).length != 0) {
+			//add Iterable and/or other util classes to dataTypesToImport
 		}
 		return dataTypesToImport
 	}

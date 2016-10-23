@@ -53,7 +53,7 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 			if (!content?.equals("")) {
 				val folderName = getTargetName(element, false)
 				val fileName = getTargetFileName(element) + getTargetFileExt()
-				val contentAndFileName = new Triplet<String,String,String>(content,folderName,fileName)
+				val contentAndFileName = new Triplet<String,String,String>(content,folderName,fileName) 
 				contentsForFolderAndFileNames.add(contentAndFileName)
 			}
 		}
@@ -65,14 +65,14 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 	}
 	
 	def dispatch String generateContent(CompositeDataType dataType) {
-		// FIXME full support for collection data types as inner data types
+		// FIXME implement importing of util classes for collection data types
 		val importsAndClassifierHead = generateImportsAndClassHead(dataType)
 		val extendsRelations = generateExtendsRelation(dataType)
 		val fields = generateFields(dataType)
 		val constructor = generateConstructor(dataType)
 		val methods = generateMethods(dataType)
 		return importsAndClassifierHead + extendsRelations + '''{
-	// FIXME full support for collection data types as inner data types
+	// FIXME implement importing of util classes for collection data types
 	«fields»
 	
 	«constructor»
@@ -93,7 +93,7 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 '
 		SEPARATOR '
 '
-		»private «declaration.getInnerDeclarationClassName» «declaration.entityName.toFirstLower»;«
+		»private «declaration.innerDeclarationClassName» «declaration.entityName.toFirstLower»;«
 	ENDFOR»''' 
 
 	/**
@@ -113,7 +113,7 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 		val innerType = dataType.innerType_CollectionDataType
 			switch innerType {
 				case CollectionDataType: return "Iterable<" + (innerType as NamedElement).entityName + ">"
-				default: return "Iterable<" + innerType.getClassName + ">"
+				default: return "Iterable<" + innerType.getClassName.primitiveToReferenceName + ">"
 			}
 	}
 	
@@ -128,10 +128,9 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 	private def String generateConstructor(CompositeDataType dataType) {
 		var nonPrimitiveFields = ""
 		for (declaration : dataType.innerDeclaration_CompositeDataType) {
-			if (declaration.datatype_InnerDeclaration instanceof CollectionDataType || 
-				declaration.datatype_InnerDeclaration instanceof CompositeDataType) {
-				nonPrimitiveFields += '''this.«declaration.entityName.toFirstLower» = new «declaration.innerDeclarationClassName»();
-				'''
+			val constructorCall = generateConstructorCall(declaration.datatype_InnerDeclaration)
+			if (!constructorCall.equals("")) {
+				nonPrimitiveFields += '''this.«dataType.entityName.toFirstLower» = ''' + constructorCall
 			}
 		}
 		return '''
@@ -159,6 +158,35 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 «   »    this.«declaration.entityName» = «declaration.entityName»;
 «   »}
 '''
+	
+	private dispatch def String generateConstructorCall(CompositeDataType dataType) {
+		return '''new «dataType.className»();
+	'''
+	}
+	
+	private dispatch def String generateConstructorCall(CollectionDataType dataType) {
+		
+		return '''new ArrayList<«dataType.innerType_CollectionDataType.className.primitiveToReferenceName»>();
+	'''
+	}
+	
+	private dispatch def String generateConstructorCall(DataType dataType) {
+		return("")
+	}
+		
+	private def String primitiveToReferenceName(String type) {
+		switch type {
+			case "int": return "Integer"
+			case "byte": return "Byte"
+			case "short": return "Short"
+			case "long": return "Long"
+			case "float": return "Float"
+			case "double": return "Double"
+			case "char": return "char"
+			case "boolean": return "Boolean"
+			default: return type
+		}
+	}
 		
 	def dispatch String generateContent(OperationInterface iface) {
 		val importsAndClassifierHead = generateImportsAndInterfaceHead(iface)
@@ -330,6 +358,7 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 		// FIXME MK get util classes to import for collection data types
 		val dataTypesToImport = new ArrayList<EObject>
 		dataTypesToImport.addAll(dataTypes.filter(CompositeDataType))
+		//TODO ColletionDataType sufficient? Why Impl? 
 		if (dataTypes.filter(CollectionDataTypeImpl).length != 0) {
 			//add Iterable and/or other util classes to dataTypesToImport
 		}

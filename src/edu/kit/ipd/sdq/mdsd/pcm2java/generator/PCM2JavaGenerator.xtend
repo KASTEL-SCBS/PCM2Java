@@ -24,7 +24,6 @@ import org.eclipse.internal.xtend.util.Triplet
 import org.palladiosimulator.pcm.repository.InnerDeclaration
 import org.palladiosimulator.pcm.repository.PrimitiveDataType
 import org.palladiosimulator.pcm.repository.CollectionDataType
-import org.palladiosimulator.pcm.repository.impl.CollectionDataTypeImpl
 
 class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 		
@@ -65,14 +64,12 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 	}
 	
 	def dispatch String generateContent(CompositeDataType dataType) {
-		// FIXME implement importing of util classes for collection data types
 		val importsAndClassifierHead = generateImportsAndClassHead(dataType)
 		val extendsRelations = generateExtendsRelation(dataType)
 		val fields = generateFields(dataType)
 		val constructor = generateConstructor(dataType)
 		val methods = generateMethods(dataType)
 		return importsAndClassifierHead + extendsRelations + '''{
-	// FIXME implement importing of util classes for collection data types
 	«fields»
 	
 	«constructor»
@@ -350,18 +347,16 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 		throw new UnsupportedGeneratorInput("generate imports for", namedElement)
 	}
 	
-	private def dispatch Iterable<? extends EObject> getElementsToImport(CompositeDataType dataType) {
-		return dataType.innerDeclaration_CompositeDataType.map[it.datatype_InnerDeclaration].dataTypesToImport
+	private def dispatch Iterable<Object> getElementsToImport(CompositeDataType dataType) {
+		val elementsToImport = new ArrayList<Object>
+		elementsToImport.addAll(dataType.innerDeclaration_CompositeDataType.map[it.datatype_InnerDeclaration].utilTypesToImport)
+		elementsToImport.addAll(dataType.innerDeclaration_CompositeDataType.map[it.datatype_InnerDeclaration].dataTypesToImport)
+		return elementsToImport
 	}
 	
 	private def Iterable<? extends EObject> getDataTypesToImport(Iterable<DataType> dataTypes) {
-		// FIXME MK get util classes to import for collection data types
 		val dataTypesToImport = new ArrayList<EObject>
 		dataTypesToImport.addAll(dataTypes.filter(CompositeDataType))
-		//TODO ColletionDataType sufficient? Why Impl? 
-		if (dataTypes.filter(CollectionDataTypeImpl).length != 0) {
-			//add Iterable and/or other util classes to dataTypesToImport
-		}
 		return dataTypesToImport
 	}
 	
@@ -379,13 +374,28 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 		return elementsToImport
 	}
 	
-	private def String generateImport(EObject eObject) {
+	private def Iterable<?> getUtilTypesToImport(Iterable<DataType> dataTypes) {
+		val dataTypesToImport = new ArrayList<Class<?>>
+		if (dataTypes.filter(CollectionDataType).length != 0) {
+			dataTypesToImport.add(Iterable)
+			dataTypesToImport.add(ArrayList)
+		}
+		return dataTypesToImport
+	}
+	
+	private dispatch def String generateImport(EObject eObject) {
 		val fullyQualifiedTypeToImport = getTargetName(eObject, true) + getSeparator(true) + getTargetFileName(eObject)
 		return generateImport(fullyQualifiedTypeToImport)
 	}
 	
-	private def String generateImport(String fullyQualifiedTypeToImport) '''import «fullyQualifiedTypeToImport»;
+	private dispatch def String generateImport(String fullyQualifiedTypeToImport) '''import «fullyQualifiedTypeToImport»;
 	'''
+	
+	private dispatch def String generateImport(Class<?> c) '''import «c.name»;
+	'''
+	
+	//Cannot generate import for generic object
+	private dispatch def String generateImport(Object object) ''''''
 	
 	private def String generateClassifierHeader(String classifierType, String classifierName) '''
 	public «classifierType» «classifierName.toFirstUpper» '''

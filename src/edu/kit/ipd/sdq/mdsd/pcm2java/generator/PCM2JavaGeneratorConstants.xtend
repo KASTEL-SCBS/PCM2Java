@@ -1,7 +1,6 @@
 package edu.kit.ipd.sdq.mdsd.pcm2java.generator
 
 import java.io.File
-import org.palladiosimulator.pcm.repository.Repository
 
 /**
  * A utility class providing String constants for PCM2Java code generation
@@ -14,6 +13,10 @@ class PCM2JavaGeneratorConstants {
 	}
 	
 	static def String getTargetFileExt() '''.java'''
+	
+	static def String getNewLine() {
+		return System.lineSeparator
+	}
 	
 	static def String getTargetFolderPrefix() '''src-gen«getSeparator(false)»'''
 	

@@ -20,6 +20,7 @@ final class PCM2JavaGeneratorDataTypes {
 		val importsAndClassifierHead = generateImportsAndClassHead(dataType)
 		val extendsRelations = generateExtendsRelation(dataType)
 		val fields = generateFields(dataType)
+		//TODO: Generate second constructor with parameters
 		val constructor = generateConstructor(dataType)
 		val methods = generateMethods(dataType)
 		return importsAndClassifierHead + extendsRelations + '''{

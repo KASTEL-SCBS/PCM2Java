@@ -50,8 +50,8 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 	private def String generateContent(EObject element) {
 		switch element {
 			CompositeDataType: PCM2JavaGeneratorDataTypes.generateContent(element)
-			OperationInterface: PCM2JavaGeneratorInterfaces.generateContent(element)
-			BasicComponent: PCM2JavaGeneratorComponents.generateContent(element)
+			OperationInterface,
+			BasicComponent: PCM2JavaGeneratorComponentsInterfaces.generateContent(element)
 			EObject: return "" //		"Cannot generate content for generic EObject '" + object + "'!"
 		}
 	}

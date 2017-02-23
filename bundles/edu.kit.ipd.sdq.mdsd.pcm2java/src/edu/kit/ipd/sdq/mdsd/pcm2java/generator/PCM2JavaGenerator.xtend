@@ -1,6 +1,6 @@
 package edu.kit.ipd.sdq.mdsd.pcm2java.generator
 
-import edu.kit.ipd.sdq.commons.ecore2txt.generator.AbstractEcore2TxtGenerator
+import edu.kit.ipd.sdq.mdsd.ecore2txt.generator.AbstractEcore2TxtGenerator
 import java.util.ArrayList
 import java.util.List
 import org.eclipse.emf.ecore.EObject

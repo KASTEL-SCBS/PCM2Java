@@ -14,6 +14,17 @@
             defaultHandler="edu.kit.ipd.sdq.mdsd.pcm2java.handler.PCM2JavaHandler"
             id="edu.kit.ipd.sdq.mdsd.pcm2java.commands.createjava"
             name="Create Java Code">
+         <commandParameter
+               id="edu.kit.ipd.sdq.mdsd.pcm2java.publicFieldsParameter"
+               name="publicFields"
+               optional="true"
+               values="org.eclipse.ui.internal.registry.WizardParameterValues$New">
+         </commandParameter>
+         <commandParameter
+               id="edu.kit.ipd.sdq.mdsd.pcm2java.replaceStringsWithCharArraysParameter"
+               name="replaceStringsWithCharArrays"
+               optional="true">
+         </commandParameter>
       </command>
    </extension>
    <extension
@@ -33,6 +44,56 @@
                   label="Create Java Code"
                   style="push"
                   tooltip="Create Java Code">
+                  <parameter
+                     name="edu.kit.ipd.sdq.mdsd.pcm2java.publicFieldsParameter"
+                     value="false">
+               	  </parameter>
+               	  <parameter
+                     name="edu.kit.ipd.sdq.mdsd.pcm2java.replaceStringsWithCharArraysParameter"
+                     value="false">
+               	  </parameter>
+            </command>
+            <command
+                  commandId="edu.kit.ipd.sdq.mdsd.pcm2java.commands.createjava"
+                  label="Create Java Code (public fields in data types)"
+                  style="push"
+                  tooltip="Create Java Code">
+                  <parameter
+                     name="edu.kit.ipd.sdq.mdsd.pcm2java.publicFieldsParameter"
+                     value="true">
+               	  </parameter>
+               	  <parameter
+                     name="edu.kit.ipd.sdq.mdsd.pcm2java.replaceStringsWithCharArraysParameter"
+                     value="false">
+               	  </parameter>
+            </command>
+            <command
+                  commandId="edu.kit.ipd.sdq.mdsd.pcm2java.commands.createjava"
+                  label="Create Java Code (Char arrays instead of Strings)"
+                  style="push"
+                  tooltip="Create Java Code">
+                  <parameter
+                     name="edu.kit.ipd.sdq.mdsd.pcm2java.publicFieldsParameter"
+                     value="false">
+               	  </parameter>
+               	  <parameter
+                     name="edu.kit.ipd.sdq.mdsd.pcm2java.replaceStringsWithCharArraysParameter"
+                     value="true">
+               	  </parameter>
+            </command>
+            <command
+                  commandId="edu.kit.ipd.sdq.mdsd.pcm2java.commands.createjava"
+                  label="Create Java Code (public fields and no Strings)"
+                  style="push"
+                  tooltip="Create Java Code">
+                  <parameter
+                     name="edu.kit.ipd.sdq.mdsd.pcm2java.publicFieldsParameter"
+                     value="true">
+               	  </parameter>
+               	  <parameter
+                     name="edu.kit.ipd.sdq.mdsd.pcm2java.replaceStringsWithCharArraysParameter"
+                     value="true">
+               	  </parameter>
             </command>
             <visibleWhen
                   checkEnabled="false">

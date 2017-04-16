@@ -9,15 +9,21 @@ import static edu.kit.ipd.sdq.mdsd.pcm2java.generator.PCM2JavaGeneratorHeadAndIm
 import static edu.kit.ipd.sdq.mdsd.pcm2java.generator.PCM2JavaGeneratorConstants.*
 import static edu.kit.ipd.sdq.mdsd.pcm2java.generator.PCM2JavaGeneratorUtil.*
 import static edu.kit.ipd.sdq.mdsd.pcm2java.generator.PCMUtil.*
+import static extension edu.kit.ipd.sdq.mdsd.pcm2java.generator.OperationInterfaceStereotypeUtil.*
 import org.palladiosimulator.pcm.repository.OperationInterface
+import edu.kit.kastel.scbs.confidentiality.repository.ParametersAndDataPair
 
-final class PCM2JavaGeneratorComponentsInterfaces {
+final class PCM2JavaGeneratorClassifier {
 	
-	/** Utility classes should not have a public or default constructor. */
-	private new() {
+	private static final boolean GENERATE_ANNOTATIONS = true
+	
+	private val boolean replaceStringsWithCharArrays
+	
+	new(boolean replaceStringsWithCharArrays) {
+		this.replaceStringsWithCharArrays = replaceStringsWithCharArrays
 	}
 	
-	def dispatch static String generateContent(BasicComponent bc) {
+	def dispatch String generateContent(BasicComponent bc) {
 		val importsAndClassifierHead = generateImportsAndClassHead(bc)
 		val implementsRelations = generateImplementsRelations(bc)
 		val fields = generateFields(bc)
@@ -33,7 +39,7 @@ final class PCM2JavaGeneratorComponentsInterfaces {
 }'''	
 	}
 	
-	private static def generateMethodDefinitions(BasicComponent bc) {
+	private def generateMethodDefinitions(BasicComponent bc) {
 		var methodDefinitions = generateMethodDefinitions(bc.providedRoles_InterfaceProvidingEntity.filter(OperationProvidedRole).map[it.providedInterface__OperationProvidedRole].map[it.signatures__OperationInterface].flatten).toString
 		val inheritedInterfaces = getAllInheritedOperationInterfaces(bc)
 		for (iface : inheritedInterfaces) {
@@ -42,7 +48,7 @@ final class PCM2JavaGeneratorComponentsInterfaces {
 		return methodDefinitions
 	}
 	
-	private static def generateMethodDefinitions(Iterable<OperationSignature> operationSignatures) '''«
+	private def generateMethodDefinitions(Iterable<OperationSignature> operationSignatures) '''«
 		FOR operationSignature : operationSignatures 
 			SEPARATOR '{
 	// TODO: implement and verify auto-generated method stub
@@ -61,14 +67,16 @@ final class PCM2JavaGeneratorComponentsInterfaces {
 	»
 	'''
 
-	private static def String generateReturnType(DataType returnType) {
+	private def String generateReturnType(DataType returnType) {
 		if (returnType != null) {
-			return getClassNameOfDataType(returnType)
+			val result = getClassNameOfDataType(returnType)
+			if (replaceStringsWithCharArrays && result.equals("String")) return "char[]"
+			else return result
 		}
 		return "void"
 	}
 		
-	private static def generateImplementsRelations(BasicComponent bc) '''«
+	private def generateImplementsRelations(BasicComponent bc) '''«
 	FOR providedInterface : getProvidedInterfaces(bc)
 		BEFORE 'implements '
 		SEPARATOR ', '
@@ -76,7 +84,7 @@ final class PCM2JavaGeneratorComponentsInterfaces {
 		»«providedInterface.entityName»«
 	ENDFOR»'''
 	
-	private static def generateFields(BasicComponent bc) '''«
+	private def generateFields(BasicComponent bc) '''«
 	FOR iface : getRequiredInterfaces(bc)
 		BEFORE '
 '
@@ -85,7 +93,7 @@ final class PCM2JavaGeneratorComponentsInterfaces {
 		»private «iface.entityName» «iface.entityName.toFirstLower»;«
 	ENDFOR»''' 
 	
-	private static def generateConstructor(BasicComponent bc) '''
+	private def generateConstructor(BasicComponent bc) '''
 	public «bc.entityName»(«
 	FOR iface2 : getRequiredInterfaces(bc)
 		SEPARATOR ", "
@@ -97,10 +105,11 @@ final class PCM2JavaGeneratorComponentsInterfaces {
     «ENDFOR»
 	}'''
 	
-	static dispatch def String generateContent(OperationInterface iface) {
+	dispatch def String generateContent(OperationInterface iface) {
 		val importsAndClassifierHead = generateImportsAndInterfaceHead(iface)
 		val extendsRelations = generateExtendsRelations(iface)
-		val methodDeclarations = generateMethodDeclarations(iface.signatures__OperationInterface)
+		val methodDeclarations =  if (GENERATE_ANNOTATIONS) generateMethodDeclarationsWithAnnotations(iface) 
+								  else generateMethodDeclarations(iface.signatures__OperationInterface)
 		return importsAndClassifierHead + extendsRelations + '''{
 			
 	«methodDeclarations»
@@ -108,8 +117,7 @@ final class PCM2JavaGeneratorComponentsInterfaces {
 }'''
 	}
 	
-	private static def generateMethodDeclarations(Iterable<OperationSignature> operationSignatures) '''«
-		
+	private def generateMethodDeclarations(Iterable<OperationSignature> operationSignatures) '''«
 		FOR operationSignature : operationSignatures 
 			SEPARATOR "; " + newLine
 			AFTER "; " + newLine
@@ -117,7 +125,27 @@ final class PCM2JavaGeneratorComponentsInterfaces {
 		ENDFOR 
 	»'''
 	
-	private static def generateExtendsRelations(OperationInterface iface) '''«
+	private def generateMethodDeclarationsWithAnnotations(OperationInterface iface) {
+	
+	val interfaceStereotypeAnnotation = '''«
+		FOR pair : iface.parametersAndDataPairs
+			SEPARATOR newLine
+			AFTER newLine
+			»«generateAnnotation(pair)»«
+	ENDFOR»'''
+	
+	'''«
+		FOR operationSignature : iface.signatures__OperationInterface 
+			SEPARATOR "; " + newLine
+			AFTER "; " + newLine
+			»«interfaceStereotypeAnnotation»«
+			»«generateAnnotations(operationSignature.parametersAndDataPairs)»«
+			»«generateMethodDeclarationWithoutSemicolon(operationSignature)»«
+		ENDFOR 
+	»'''
+	}
+	
+	private def generateExtendsRelations(OperationInterface iface) '''«
 	FOR providedInterface : getAllInheritedOperationInterfaces(iface)
 		BEFORE 'extends '
 		SEPARATOR ', '
@@ -125,15 +153,29 @@ final class PCM2JavaGeneratorComponentsInterfaces {
 		»«providedInterface.entityName»«
 	ENDFOR»'''
 	
-	private static def String generateMethodDeclarationWithoutSemicolon(OperationSignature operationSignature) {
+	private def String generateMethodDeclarationWithoutSemicolon(OperationSignature operationSignature) {
 				val returnType = operationSignature.returnType__OperationSignature.generateReturnType
 				val methodName = getMethodName(operationSignature)
-				val parameterDeclarations = '''«
+				var parameterDeclarations = '''«
 				FOR parameter : operationSignature.parameters__OperationSignature
 					SEPARATOR ', '
 »«getClassNameOfDataType(parameter.dataType__Parameter)» «getParameterName(parameter)»«
 				ENDFOR»'''
+				if (replaceStringsWithCharArrays) parameterDeclarations = parameterDeclarations.replace("String", "char[]")
 				return '''«returnType» «methodName»(«parameterDeclarations»)'''
+	}
+	
+	private def String generateAnnotations(Iterable<ParametersAndDataPair> parametersAndDataPairs) '''«
+		FOR pair : parametersAndDataPairs
+			SEPARATOR newLine
+			AFTER newLine
+			»«generateAnnotation(pair)»«
+	ENDFOR»'''
+	
+	private def String generateAnnotation(ParametersAndDataPair parametersAndDataPair) {
+		val dataSetName = parametersAndDataPair.name.split(" - ").get(1).substring(2)
+		val parameterNames = parametersAndDataPair.name.split(" - ").get(0).substring(2)
+		return "@InformationFlow " + dataSetName +  " includes " + parameterNames
 	}
 	
 }

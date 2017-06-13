@@ -1,4 +1,4 @@
-package edu.kit.ipd.sdq.mdsd.pcm2java.generator
+package edu.kit.ipd.sdq.mdsd.pcm2java.util
 
 import org.palladiosimulator.pcm.repository.PrimitiveTypeEnum
 import org.palladiosimulator.pcm.repository.PrimitiveDataType
@@ -21,13 +21,13 @@ class PCM2JavaTargetNameUtil {
 	}
 	
 	static def dispatch String getTargetName(EObject object, boolean pkg) {
-		throw new UnsupportedGeneratorInput("determine a target " + if (pkg) "package" else "folder" + " name", object)
+		throw new edu.kit.ipd.sdq.mdsd.pcm2java.generator.UnsupportedGeneratorInput("determine a target " + if (pkg) "package" else "folder" + " name", object)
 	}
 		
 	static def dispatch String getTargetName(NamedElement namedElement, boolean pkg) {
 		return namedElement.entityName
 	}
-	
+		
 	static def dispatch String getTargetName(CompositeDataType dataType, boolean pkg) {
 		return getContractsTargetPrefix(dataType.repository__DataType, pkg) + getSeparator(pkg) + getDataTypesTargetName() + getSeparatorAtEnd(pkg)
 	}
@@ -60,7 +60,7 @@ class PCM2JavaTargetNameUtil {
 	}
 	
 	static def dispatch String getTargetFileName(EObject object) {
-		throw new UnsupportedGeneratorInput("determine a target file name", object)
+		throw new edu.kit.ipd.sdq.mdsd.pcm2java.generator.UnsupportedGeneratorInput("determine a target file name", object)
 	}
 	
 	static def dispatch String getTargetFileName(NamedElement namedElement) {
@@ -82,3 +82,4 @@ class PCM2JavaTargetNameUtil {
 	
 	static def dispatch String getTargetFileName(Void v) '''void'''
 }
+		

@@ -12,9 +12,12 @@ import org.palladiosimulator.pcm.repository.DataType
 import org.palladiosimulator.pcm.repository.OperationInterface
 
 import static edu.kit.ipd.sdq.mdsd.pcm2java.generator.PCM2JavaGeneratorConstants.*
-import static edu.kit.ipd.sdq.mdsd.pcm2java.generator.PCM2JavaGeneratorUtil.*
-import static edu.kit.ipd.sdq.mdsd.pcm2java.generator.PCM2JavaTargetNameUtil.*
-import static edu.kit.ipd.sdq.mdsd.pcm2java.generator.PCMUtil.*
+
+import static extension edu.kit.ipd.sdq.commons.util.org.palladiosimulator.pcm.core.entity.CollectionDataTypeUtil.*
+import static extension edu.kit.ipd.sdq.commons.util.org.palladiosimulator.pcm.core.entity.InterfaceProvidingEntityUtil.*
+import static extension edu.kit.ipd.sdq.commons.util.org.palladiosimulator.pcm.core.entity.InterfaceRequiringEntityUtil.*
+import static extension edu.kit.ipd.sdq.commons.util.org.palladiosimulator.pcm.repository.BasicComponentUtil.*
+import static extension edu.kit.ipd.sdq.mdsd.pcm2java.util.PCM2JavaTargetNameUtil.*
 
 final class PCM2JavaGeneratorHeadAndImports {
 	
@@ -75,7 +78,7 @@ final class PCM2JavaGeneratorHeadAndImports {
 			dataTypesToImport.add(Iterable)
 			dataTypesToImport.add(ArrayList)
 		}
-		dataTypesToImport.addAll(getInnerTypes(dataTypes.filter(CollectionDataType)).filter(CompositeDataType))
+		dataTypesToImport.addAll(dataTypes.filter(CollectionDataType).getInnerTypes.filter(CompositeDataType))
 		return dataTypesToImport
 	}
 	
@@ -95,10 +98,10 @@ final class PCM2JavaGeneratorHeadAndImports {
 	
 	private static def dispatch Iterable<Object> getElementsToImport(BasicComponent bc) {
 		val elementsToImport = new HashSet<Object>()
-		elementsToImport.addAll(getProvidedInterfaces(bc))
-		elementsToImport.addAll(getRequiredInterfaces(bc))
+		elementsToImport.addAll(bc.getProvidedInterfaces)
+		elementsToImport.addAll(bc.getRequiredInterfaces)
 		elementsToImport.addAll(bc.typesUsedInSignaturesOfProvidedServices)
-		for (iface : getAllInheritedOperationInterfaces(bc)) {
+		for (iface : bc.getAllInheritedOperationInterfaces) {
 			elementsToImport.addAll(iface.typesUsedInSignaturesOfProvidedServices) // 
 		}
 		return elementsToImport
@@ -106,14 +109,14 @@ final class PCM2JavaGeneratorHeadAndImports {
 	
 	private static def Iterable<Object> getTypesUsedInSignaturesOfProvidedServices(InterfaceProvidingEntity ipe) {
 		val usedTypes = new HashSet<Object>()
-		for (providedInterface : getProvidedInterfaces(ipe)) {
+		for (providedInterface : ipe.getProvidedInterfaces) {
 			usedTypes.addAll(getTypesUsedInSignaturesOfProvidedServices(providedInterface))
 		}
 		return usedTypes
 	}
 
 	private static dispatch def String generateImport(EObject eObject) {
-		val fullyQualifiedTypeToImport = getTargetName(eObject, true) + getSeparator(true) + getTargetFileName(eObject)
+		val fullyQualifiedTypeToImport = eObject.getTargetName(true) + getSeparator(true) + eObject.getTargetFileName
 		return generateImport(fullyQualifiedTypeToImport)
 	}
 	

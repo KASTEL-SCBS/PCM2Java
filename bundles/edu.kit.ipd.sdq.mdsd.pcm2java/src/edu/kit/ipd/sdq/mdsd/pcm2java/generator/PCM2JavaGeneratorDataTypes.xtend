@@ -8,27 +8,23 @@ import org.palladiosimulator.pcm.repository.PrimitiveDataType
 
 import static edu.kit.ipd.sdq.mdsd.pcm2java.generator.PCM2JavaGeneratorConstants.*
 import static edu.kit.ipd.sdq.mdsd.pcm2java.generator.PCM2JavaGeneratorHeadAndImports.*
-import static edu.kit.ipd.sdq.mdsd.pcm2java.generator.PCM2JavaGeneratorUtil.*
 
-final class PCM2JavaGeneratorDataTypes {
+import static extension edu.kit.ipd.sdq.commons.util.org.palladiosimulator.pcm.core.entity.CompositeDataTypeUtil.*
+import static extension edu.kit.ipd.sdq.mdsd.pcm2java.util.DataTypeUtil.*
+import static extension edu.kit.ipd.sdq.mdsd.pcm2java.util.InnerDeclarationUtil.*
+
+class PCM2JavaGeneratorDataTypes {
 	
-	private val boolean publicFields
-	private val boolean replaceStringsWithCharArrays
+	private CompositeDataType dataType
 	
-	new(boolean publicFields, boolean replaceStringsWithCharArrays) {
-		this.publicFields = publicFields
-		this.replaceStringsWithCharArrays = replaceStringsWithCharArrays 
-	}
-		
 	def String generateContent(CompositeDataType dataType) {
-		val importsAndClassifierHead = generateImportsAndClassHead(dataType)
-		val extendsRelations = generateExtendsRelation(dataType)
-		val fields = generateFields(dataType)
-		val constructor = generateConstructor(dataType)
-		var methods = ""
-		if (!publicFields) {
-			methods = generateMethods(dataType).toString
-		}
+		this.dataType = dataType
+		val importsAndClassifierHead = generateImportsAndClassHead(this.dataType)
+		val extendsRelations = generateExtendsRelation()
+		val fields = generateFields()
+		val constructor = generateConstructor()
+		val methods = generateMethods()
+		this.dataType = null
 		return importsAndClassifierHead + extendsRelations + '''{
 	«fields»
 	
@@ -38,43 +34,45 @@ final class PCM2JavaGeneratorDataTypes {
 }'''
 	}
 		
-	private def generateExtendsRelation(CompositeDataType dataType) '''«
+	private def generateExtendsRelation() '''«
 	FOR parent : dataType.parentType_CompositeDataType
 		BEFORE 'extends '
 		»«parent.entityName» «
 	ENDFOR»'''	
 		
-	private def generateFields(CompositeDataType dataType) {
-	val modifier = if (publicFields) "public" else "private"
+	private def generateFields() {
+	val modifier = generateFieldVisibilityModifier
 	'''« 
 	FOR declaration : dataType.innerDeclaration_CompositeDataType
 		BEFORE newLine
 		SEPARATOR newLine
-		»«modifier» «getInnerDeclarationClassName(declaration, replaceStringsWithCharArrays)» «declaration.entityName»;«
+		»«modifier» «declaration.getInnerDeclarationClassName» «declaration.entityName»;«
 	ENDFOR»''' 
 	}
 	
-	private def String generateConstructor(CompositeDataType dataType) {
+	protected def generateFieldVisibilityModifier() '''private'''
+	
+	private def String generateConstructor() {
 		if (dataType.innerDeclaration_CompositeDataType.size > 0) {
-			return generateStandardConstructor(dataType).toString + newLine + generateArgumentConstructor(dataType).toString
+			return generateStandardConstructor().toString + newLine + generateArgumentConstructor().toString
 		} else {
-			return generateStandardConstructor(dataType).toString	
+			return generateStandardConstructor().toString	
 		}
 	}
 	
-	private def generateStandardConstructor(CompositeDataType dataType) '''
+	private def generateStandardConstructor() '''
 	public «dataType.entityName»() {
 		// TODO: Implement and verify auto-generated constructor.
-		«FOR declaration : getNonPrimitiveDeclarations(dataType)
+		«FOR declaration : dataType.getNonPrimitiveDeclarations
 			»this.«declaration.entityName» = «generateConstructorCall(declaration.datatype_InnerDeclaration)»«
 		ENDFOR»
 	}
 	'''
-	private def generateArgumentConstructor(CompositeDataType dataType)'''
+	private def generateArgumentConstructor()'''
 	public «dataType.entityName»(«
 		FOR declaration : dataType.innerDeclaration_CompositeDataType
 			SEPARATOR ", "
-			»«getInnerDeclarationClassName(declaration, replaceStringsWithCharArrays).toFirstUpper» «declaration.entityName»«
+			»«declaration.getInnerDeclarationClassName.toFirstUpper» «declaration.entityName»«
 		ENDFOR»«
 	») {
 		// TODO: Implement and verify auto-generated constructor.
@@ -85,33 +83,34 @@ final class PCM2JavaGeneratorDataTypes {
 	}
 	'''
 	
-	private def generateMethods(CompositeDataType dataType) '''«
-		FOR declaration : dataType.innerDeclaration_CompositeDataType
+	private def generateMethods() {
+	if (generateFieldVisibilityModifier.equals("public")) return ""
+	'''«FOR declaration : dataType.innerDeclaration_CompositeDataType
 			SEPARATOR newLine
 			AFTER newLine
 		»«generateGetterSetter(declaration)
-		»«ENDFOR
-	»'''
+		»«ENDFOR»'''
+	}
 	
 	private def generateGetterSetter(InnerDeclaration declaration) '''«
-	»public «getInnerDeclarationClassName(declaration, replaceStringsWithCharArrays)» get«declaration.entityName.toFirstUpper»() {
+	»public «declaration.getInnerDeclarationClassName» get«declaration.entityName.toFirstUpper»() {
 «   »    return «declaration.entityName»;
 «   »}
 
 «
-	»public void set«declaration.entityName.toFirstUpper»(«getInnerDeclarationClassName(declaration, replaceStringsWithCharArrays)» «declaration.entityName») {
+	»public void set«declaration.entityName.toFirstUpper»(«declaration.getInnerDeclarationClassName» «declaration.entityName») {
 «   »    this.«declaration.entityName» = «declaration.entityName»;
 «   »}
 '''
 		
 	private dispatch def String generateConstructorCall(CompositeDataType dataType) {
-		return '''new «getClassNameOfDataType(dataType)»();«newLine»'''
+		return '''new «dataType.getClassNameOfDataType»();«newLine»'''
 	}
 	
 	private dispatch def String generateConstructorCall(CollectionDataType dataType) {
 		val innerType = dataType.innerType_CollectionDataType
-		if (innerType != null) {
-			return '''new ArrayList<«primitiveToReferenceName(getClassNameOfDataType(dataType.innerType_CollectionDataType))»>();«newLine»'''
+		if (innerType !== null) {
+			return '''new ArrayList<«dataType.innerType_CollectionDataType.getClassNameOfDataType.primitiveToReferenceName»>();«newLine»'''
 		} else {
 			return '''new ArrayList<Object>();«newLine»'''
 		}
@@ -119,8 +118,7 @@ final class PCM2JavaGeneratorDataTypes {
 	
 	private dispatch def String generateConstructorCall(PrimitiveDataType dataType) throws UnsupportedOperationException {
 		switch (dataType.type) {
-			case STRING : if (replaceStringsWithCharArrays) '''new char[0];«newLine»'''
-						  else '''"";«newLine»'''
+			case STRING : '''"";''' +  newLine
 			default: throw new UnsupportedOperationException("Can only generate constructor calls for primitive type String: " + dataType.type)
 		}
 	}

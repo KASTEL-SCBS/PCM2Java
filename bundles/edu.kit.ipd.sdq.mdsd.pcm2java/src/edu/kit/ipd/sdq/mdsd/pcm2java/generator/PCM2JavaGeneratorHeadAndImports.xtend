@@ -19,38 +19,38 @@ import static extension edu.kit.ipd.sdq.commons.util.org.palladiosimulator.pcm.c
 import static extension edu.kit.ipd.sdq.commons.util.org.palladiosimulator.pcm.repository.BasicComponentUtil.*
 import static extension edu.kit.ipd.sdq.mdsd.pcm2java.util.PCM2JavaTargetNameUtil.*
 
-final class PCM2JavaGeneratorHeadAndImports {
+class PCM2JavaGeneratorHeadAndImports {
 	
-	/** Utility classes should not have a public or default constructor. */
-	private new() {
+	private NamedElement namedElement
+	
+	def String generateImportsAndClassHead(NamedElement namedElement) {
+		this.namedElement = namedElement
+		return generateImportsAndClassifierHead("class")
 	}
 	
-	static def String generateImportsAndClassHead(NamedElement namedElement) {
-		return generateImportsAndClassifierHead(namedElement,"class")
+	def String generateImportsAndInterfaceHead(NamedElement namedElement) {
+		this.namedElement = namedElement
+		return generateImportsAndClassifierHead("interface")
 	}
 	
-	static def String generateImportsAndInterfaceHead(NamedElement namedElement) {
-		return generateImportsAndClassifierHead(namedElement,"interface")
-	}
-	
-	static def String generateImportsAndClassifierHead(NamedElement namedElement, String classifierType) {
-		val packageDeclaration = generatePackageDeclaration(namedElement)
-		val imports = generateImports(namedElement)
+	private def String generateImportsAndClassifierHead(String classifierType) {
+		val packageDeclaration = generatePackageDeclaration()
+		val imports = generateImports()
 		val classifierName = namedElement.entityName
 		val classifierHead = generateClassifierHeader(classifierType, classifierName)
 		return packageDeclaration + imports + classifierHead
 	}
 	
-	private static def String generatePackageDeclaration(NamedElement element) {
-		return "package " + getTargetName(element, true) + ''';
+	private def String generatePackageDeclaration() {
+		return "package " + getTargetName(namedElement, true) + ''';
 
 '''
 	}
 	
-	private static def String generateClassifierHeader(String classifierType, String classifierName) '''
+	private def String generateClassifierHeader(String classifierType, String classifierName) '''
 	public «classifierType» «classifierName» '''
 	
-	private static def String generateImports(NamedElement namedElement) {
+	private def String generateImports() {
 		var imports = ""
 		var elementsToImport = getElementsToImport(namedElement)
 		for (elementToImport : elementsToImport) {
@@ -61,17 +61,17 @@ final class PCM2JavaGeneratorHeadAndImports {
 '''
 	}
 	
-	private static def dispatch Iterable<? extends EObject> getElementsToImport(NamedElement namedElement) {
+	def dispatch Iterable<? extends EObject> getElementsToImport(NamedElement namedElement) {
 		throw new UnsupportedGeneratorInput("generate imports for", namedElement)
 	}
 	
-	private static def dispatch Iterable<Object> getElementsToImport(CompositeDataType dataType) {
+	def dispatch Iterable<Object> getElementsToImport(CompositeDataType dataType) {
 		val elementsToImport = new ArrayList<Object>
 		elementsToImport.addAll(dataType.innerDeclaration_CompositeDataType.map[it.datatype_InnerDeclaration].dataTypesToImport)
 		return elementsToImport
 	}
 	
-	private static def Iterable<Object> getDataTypesToImport(Iterable<DataType> dataTypes) {
+	private def Iterable<Object> getDataTypesToImport(Iterable<DataType> dataTypes) {
 		val dataTypesToImport = new HashSet<Object>
 		dataTypesToImport.addAll(dataTypes.filter(CompositeDataType))
 		if (dataTypes.filter(CollectionDataType).length != 0) {
@@ -82,11 +82,11 @@ final class PCM2JavaGeneratorHeadAndImports {
 		return dataTypesToImport
 	}
 	
-	private static def dispatch Iterable<Object> getElementsToImport(OperationInterface iface) {
+	def dispatch Iterable<Object> getElementsToImport(OperationInterface iface) {
 		return getTypesUsedInSignaturesOfProvidedServices(iface)
 	}
 	
-	private static def Iterable<Object> getTypesUsedInSignaturesOfProvidedServices(OperationInterface iface) {
+	private def Iterable<Object> getTypesUsedInSignaturesOfProvidedServices(OperationInterface iface) {
 		val usedTypes =  new HashSet<Object>
 		for (providedSignature : iface.signatures__OperationInterface) {
 			usedTypes.addAll(getDataTypesToImport(#{providedSignature.returnType__OperationSignature}))
@@ -96,7 +96,7 @@ final class PCM2JavaGeneratorHeadAndImports {
 		return usedTypes
 	}
 	
-	private static def dispatch Iterable<Object> getElementsToImport(BasicComponent bc) {
+	def dispatch Iterable<Object> getElementsToImport(BasicComponent bc) {
 		val elementsToImport = new HashSet<Object>()
 		elementsToImport.addAll(bc.getProvidedInterfaces)
 		elementsToImport.addAll(bc.getRequiredInterfaces)
@@ -107,7 +107,7 @@ final class PCM2JavaGeneratorHeadAndImports {
 		return elementsToImport
 	}
 	
-	private static def Iterable<Object> getTypesUsedInSignaturesOfProvidedServices(InterfaceProvidingEntity ipe) {
+	private def Iterable<Object> getTypesUsedInSignaturesOfProvidedServices(InterfaceProvidingEntity ipe) {
 		val usedTypes = new HashSet<Object>()
 		for (providedInterface : ipe.getProvidedInterfaces) {
 			usedTypes.addAll(getTypesUsedInSignaturesOfProvidedServices(providedInterface))
@@ -115,15 +115,15 @@ final class PCM2JavaGeneratorHeadAndImports {
 		return usedTypes
 	}
 
-	private static dispatch def String generateImport(EObject eObject) {
+	private dispatch def String generateImport(EObject eObject) {
 		val fullyQualifiedTypeToImport = eObject.getTargetName(true) + getSeparator(true) + eObject.getTargetFileName
 		return generateImport(fullyQualifiedTypeToImport)
 	}
 	
-	private static dispatch def String generateImport(String fullyQualifiedTypeToImport) '''import «fullyQualifiedTypeToImport»;
+	private dispatch def String generateImport(String fullyQualifiedTypeToImport) '''import «fullyQualifiedTypeToImport»;
 	'''
 	
-	private static dispatch def String generateImport(Class<?> c) '''import «c.name»;
+	private dispatch def String generateImport(Class<?> c) '''import «c.name»;
 	'''
 	
 }

@@ -7,24 +7,27 @@ import org.palladiosimulator.pcm.repository.OperationProvidedRole
 import org.palladiosimulator.pcm.repository.OperationSignature
 
 import static edu.kit.ipd.sdq.mdsd.pcm2java.generator.PCM2JavaGeneratorConstants.*
-import static edu.kit.ipd.sdq.mdsd.pcm2java.generator.PCM2JavaGeneratorHeadAndImports.*
 
-import static extension edu.kit.ipd.sdq.mdsd.pcm2java.util.SignatureUtil.*
-import static extension edu.kit.ipd.sdq.mdsd.pcm2java.util.DataTypeUtil.*
 import static extension edu.kit.ipd.sdq.commons.util.org.palladiosimulator.pcm.core.entity.InterfaceProvidingEntityUtil.*
 import static extension edu.kit.ipd.sdq.commons.util.org.palladiosimulator.pcm.core.entity.InterfaceRequiringEntityUtil.*
 import static extension edu.kit.ipd.sdq.commons.util.org.palladiosimulator.pcm.repository.BasicComponentUtil.*
 import static extension edu.kit.ipd.sdq.commons.util.org.palladiosimulator.pcm.repository.OperationInterfaceUtil.*
-
+import static extension edu.kit.ipd.sdq.mdsd.pcm2java.util.DataTypeUtil.*
+import static extension edu.kit.ipd.sdq.mdsd.pcm2java.util.SignatureUtil.*
 
 class PCM2JavaGeneratorClassifier {
 
 	private BasicComponent bc
 	protected OperationInterface iface
+	protected PCM2JavaGeneratorHeadAndImports generatorHeadAndImports
+
+	new() {
+		generatorHeadAndImports = new PCM2JavaGeneratorHeadAndImports
+	}
 
 	def dispatch String generateContent(BasicComponent bc) {
 		this.bc = bc
-		val importsAndClassifierHead = generateImportsAndClassHead(this.bc)
+		val importsAndClassifierHead = generatorHeadAndImports.generateImportsAndClassHead(this.bc)
 		val implementsRelations = generateImplementsRelations()
 		val fields = generateFields()
 		val constructor = generateConstructor()
@@ -115,7 +118,7 @@ class PCM2JavaGeneratorClassifier {
 	}
 	
 	protected def String generateImportsAndHead() '''«
-		generateImportsAndInterfaceHead(iface)
+		generatorHeadAndImports.generateImportsAndInterfaceHead(iface)
 	»'''
 	
 	private def generateExtendsRelations() '''«

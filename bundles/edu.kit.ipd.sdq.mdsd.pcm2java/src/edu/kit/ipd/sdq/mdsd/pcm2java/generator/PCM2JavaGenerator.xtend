@@ -53,14 +53,23 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 				contentsForFolderAndFileNames.add(contentAndFileName)
 			}
 		}
+		contentsForFolderAndFileNames.generateAndAddOptionalContents
 	}
 	
-	protected def String generateContent(EObject element) {
+	private def String generateContent(EObject element) {
 		switch element {
 			CompositeDataType: postProcessGeneratedContents(generatorDataTypes.generateContent(element))
 			OperationInterface,
 			BasicComponent: postProcessGeneratedContents(generatorClassifier.generateContent(element))
-			EObject: return "" //		"Cannot generate content for generic EObject '" + object + "'!"
+			EObject: generateContentUnexpectedEObject(element)
 		}
+	}
+	
+	protected def String generateContentUnexpectedEObject(EObject element) {
+		 "" //		"Cannot generate content for generic EObject '" + object + "'!"
+	}
+	
+	protected def void generateAndAddOptionalContents(List<Triplet<String,String,String>> contentsForFolderAndFileNames) {
+		// No optional content needed for plain pcm2java
 	}
 }

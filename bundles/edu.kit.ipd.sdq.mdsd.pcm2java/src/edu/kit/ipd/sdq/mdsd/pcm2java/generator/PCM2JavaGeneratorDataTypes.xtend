@@ -7,7 +7,6 @@ import org.palladiosimulator.pcm.repository.InnerDeclaration
 import org.palladiosimulator.pcm.repository.PrimitiveDataType
 
 import static edu.kit.ipd.sdq.mdsd.pcm2java.generator.PCM2JavaGeneratorConstants.*
-import static edu.kit.ipd.sdq.mdsd.pcm2java.generator.PCM2JavaGeneratorHeadAndImports.*
 
 import static extension edu.kit.ipd.sdq.commons.util.org.palladiosimulator.pcm.core.entity.CompositeDataTypeUtil.*
 import static extension edu.kit.ipd.sdq.mdsd.pcm2java.util.DataTypeUtil.*
@@ -16,10 +15,11 @@ import static extension edu.kit.ipd.sdq.mdsd.pcm2java.util.InnerDeclarationUtil.
 class PCM2JavaGeneratorDataTypes {
 	
 	private CompositeDataType dataType
+	private val generatorHeadAndImports = new PCM2JavaGeneratorHeadAndImports
 	
 	def String generateContent(CompositeDataType dataType) {
 		this.dataType = dataType
-		val importsAndClassifierHead = generateImportsAndClassHead(this.dataType)
+		val importsAndClassifierHead = generatorHeadAndImports.generateImportsAndClassHead(this.dataType)
 		val extendsRelations = generateExtendsRelation()
 		val fields = generateFields()
 		val constructor = generateConstructor()

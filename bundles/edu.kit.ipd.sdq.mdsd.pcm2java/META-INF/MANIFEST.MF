@@ -12,6 +12,7 @@ Require-Bundle: org.eclipse.xtend.lib,
  org.eclipse.ui,
  org.eclipse.xtext.builder,
  edu.kit.ipd.sdq.mdsd.ecore2txt,
- tools.vitruv.framework.util,
- edu.kit.ipd.sdq.commons.util.pcm
+ edu.kit.ipd.sdq.commons.util.java,
+ edu.kit.ipd.sdq.commons.util.pcm,
+ edu.kit.ipd.sdq.commons.util.emf
 Export-Package: edu.kit.ipd.sdq.mdsd.pcm2java.generator

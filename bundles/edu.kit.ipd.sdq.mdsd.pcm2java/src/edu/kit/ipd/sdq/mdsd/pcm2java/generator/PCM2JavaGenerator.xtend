@@ -9,10 +9,10 @@ import org.eclipse.internal.xtend.util.Triplet
 import org.palladiosimulator.pcm.repository.BasicComponent
 import org.palladiosimulator.pcm.repository.CompositeDataType
 import org.palladiosimulator.pcm.repository.OperationInterface
-import tools.vitruv.framework.util.bridges.EcoreBridge
 
 import static edu.kit.ipd.sdq.mdsd.pcm2java.generator.PCM2JavaGeneratorConstants.*
 import static edu.kit.ipd.sdq.mdsd.pcm2java.util.PCM2JavaTargetNameUtil.*
+import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceUtil.*
 
 class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 		
@@ -44,7 +44,7 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 	}
 
 	private def void generateAndAddContents(Resource inputResource, List<Triplet<String,String,String>> contentsForFolderAndFileNames) {
-		for (element : EcoreBridge.getAllContents(inputResource)) {
+		for (element : inputResource.getAllContentsIterable()) {
 			val content = generateContent(element)
 			if (content !== null && !content.equals("")) {
 				val folderName = getTargetName(element, false)

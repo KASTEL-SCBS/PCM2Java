@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: PCM2Java
-Bundle-SymbolicName: edu.kit.ipd.sdq.mdsd.pcm2java;singleton:=true
+Bundle-SymbolicName: edu.kit.ipd.sdq.mdsd.pcm2java
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SDQ
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/edu.kit.ipd.sdq.mdsd.pcm2java.feature_1.0.0.qualifier.jar" id="edu.kit.ipd.sdq.mdsd.pcm2java.feature" version="1.0.0.qualifier">
+      <category name="pcm2java"/>
+   </feature>
+   <category-def name="pcm2java" label="pcm2java">
+      <description>
+	Generate Java code for Palladio software architecture models
+      </description>
+   </category-def>
+</site>

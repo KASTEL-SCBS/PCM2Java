@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="edu.kit.ipd.sdq.mdsd.pcm2java.feature"
+      label="pcm2java"
+      version="1.0.0.qualifier"
+      provider-name="SDQ">
+   <description url="https://github.com/kit-sdq/PCM2Java">
+      Generate Java code for Palladio software architecture models 
+   </description>
+   <copyright url="http://www.example.com/copyright">
+      [TODO Enter Copyright Description here.]
+   </copyright>
+   <license url="http://www.example.com/license">
+      [TODO Enter License Description here.]
+   </license>
+   <plugin
+         id="edu.kit.ipd.sdq.mdsd.pcm2java"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+</feature>

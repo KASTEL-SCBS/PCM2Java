@@ -4,9 +4,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>edu.kit.ipd.sdq.mdsd.pcm2java</groupId>
-		<artifactId>releng</artifactId>
+		<artifactId>parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
-		<relativePath>../</relativePath>
+		<relativePath>../edu.kit.ipd.sdq.mdsd.pcm2java.parent</relativePath>
 	</parent>
 	<artifactId>edu.kit.ipd.sdq.mdsd.pcm2java.updatesite.aggregated</artifactId>
 	<packaging>pom</packaging>

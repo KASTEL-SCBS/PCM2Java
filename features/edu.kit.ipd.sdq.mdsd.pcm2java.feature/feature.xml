@@ -14,8 +14,11 @@
       [TODO Enter License Description here.]
    </license>
    <requires>
-      <import feature="org.palladiosimulator.pcm.feature" version="4.0.1" match="greaterOrEqual"/>
-      <import feature="org.palladiosimulator.editors.tree.feature" version="4.0.1" match="greaterOrEqual"/>
+      <import feature="org.eclipse.xtend.source"/>
+      <import feature="edu.kit.ipd.sdq.mdsd.ecore2txt.feature.source" version="1.0.0" match="greaterOrEqual"/>
+      <import feature="edu.kit.ipd.sdq.commons.util.pcm.feature.source" version="1.0.0" match="greaterOrEqual"/>
+      <import feature="org.palladiosimulator.pcm.feature.source" version="4.0.1" match="greaterOrEqual"/>
+      <import feature="org.palladiosimulator.editors.tree.feature.source" version="4.0.1" match="greaterOrEqual"/>
    </requires>
    <plugin
          id="edu.kit.ipd.sdq.mdsd.pcm2java"

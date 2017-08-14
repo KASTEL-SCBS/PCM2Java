@@ -72,7 +72,7 @@ class PCM2JavaGeneratorDataTypes {
 	public «dataType.entityName»(«
 		FOR declaration : dataType.innerDeclaration_CompositeDataType
 			SEPARATOR ", "
-			»«declaration.getInnerDeclarationClassName.toFirstUpper» «declaration.entityName»«
+			»«declaration.getInnerDeclarationClassName» «declaration.entityName»«
 		ENDFOR»«
 	») {
 		// TODO: Implement and verify auto-generated constructor.

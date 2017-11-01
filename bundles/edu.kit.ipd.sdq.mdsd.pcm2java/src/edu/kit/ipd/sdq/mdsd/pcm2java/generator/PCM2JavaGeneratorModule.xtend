@@ -11,4 +11,5 @@ class PCM2JavaGeneratorModule extends AbstractEcore2TxtGeneratorModule {
 	override protected String getFileExtensions() {
 		return "repository"
 	}
+	
 }

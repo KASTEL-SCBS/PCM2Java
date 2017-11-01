@@ -16,6 +16,7 @@ import org.palladiosimulator.pcm.repository.BasicComponent
  * 
  */
 class PCM2JavaTargetNameUtil {
+	
 	/** Utility classes should not have a public or default constructor. */
 	private new() {
 	}

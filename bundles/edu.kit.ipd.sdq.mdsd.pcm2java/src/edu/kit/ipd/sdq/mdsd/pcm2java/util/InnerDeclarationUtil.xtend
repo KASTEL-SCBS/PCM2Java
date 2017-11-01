@@ -13,7 +13,10 @@ class InnerDeclarationUtil {
 	private new() {
 	}	
 	/**
-	 * Returns the type of the DataType that is contained in the given InnerDeclaration as String.
+	 * Returns the name of the class of the data type, as used in Java, that is contained in the given InnerDeclaration.
+	 * 
+	 * @param declaration a PCM inner declaration // TODO: is it a PCM (!) inner declaration?!
+	 * @return name of the class
 	 */ 
 	static def String getInnerDeclarationClassName(InnerDeclaration declaration){
 		declaration.datatype_InnerDeclaration.classNameOfDataType

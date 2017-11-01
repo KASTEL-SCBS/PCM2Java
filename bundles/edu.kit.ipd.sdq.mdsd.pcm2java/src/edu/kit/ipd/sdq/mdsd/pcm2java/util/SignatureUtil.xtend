@@ -11,6 +11,13 @@ class SignatureUtil {
 	private new() {
 	}
 	
+	/**
+	 * Returns the name of the given operation signature, starting with a lower-case letter.
+	 * That name will be used for a generated Java method that represents the operation signature.
+	 * 
+	 * @param operationSignature a PCM operation signature
+	 * @return the generated method name
+	 */
 	static def String getMethodName(Signature operationSignature) {
 		return operationSignature.entityName.toFirstLower
 	}

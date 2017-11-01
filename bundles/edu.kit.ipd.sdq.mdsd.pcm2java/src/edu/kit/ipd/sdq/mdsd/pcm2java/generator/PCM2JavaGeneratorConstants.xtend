@@ -8,6 +8,7 @@ import java.io.File
  */
 
 class PCM2JavaGeneratorConstants {
+	
 	/** Utility classes should not have a public or default constructor. */
 	private new() {
 	}

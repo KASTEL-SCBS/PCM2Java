@@ -3,7 +3,7 @@ package edu.kit.ipd.sdq.mdsd.pcm2java.util
 import org.palladiosimulator.pcm.repository.Parameter
 
 /**
- * A utility class providing extension methods for Parameters
+ * A utility class providing utility extension methods for Parameters
  */
 class ParameterUtil {
 	
@@ -11,6 +11,12 @@ class ParameterUtil {
 	private new() {
 	}
 	
+	/**
+	 * Returns the parameter name of the given parameter, starting with a lower case letter.
+	 * 
+	 * @param parameter a PCM parameter
+	 * @return the parameter name
+	 */
 	static def String getParameterName(Parameter parameter) {
 		parameter.parameterName.toFirstLower
 	}

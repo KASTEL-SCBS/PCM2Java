@@ -110,7 +110,7 @@ class PCM2JavaGeneratorHeadAndImports {
 	 * @return an iterable object consisting of all elements that are necessary to import
 	 * @throws UnsupportedGeneratorInput if it is not possible to generate the necessary imports for the given entity
 	 */
-	private def dispatch Iterable<? extends EObject> getElementsToImport(Entity entity) {
+	def dispatch Iterable<? extends EObject> getElementsToImport(Entity entity) {
 		throw new UnsupportedGeneratorInput("can't generate imports for", entity)
 	}
 	
@@ -122,7 +122,7 @@ class PCM2JavaGeneratorHeadAndImports {
 	 * @return an iterable object consisting of all elements that are necessary to import
 	 * @throws UnsupportedGeneratorInput if it is not possible to generate the necessary imports for the given entity
 	 */
-	private def dispatch Iterable<Object> getElementsToImport(CompositeDataType dataType) {
+	def dispatch Iterable<Object> getElementsToImport(CompositeDataType dataType) {
 		val elementsToImport = new ArrayList<Object>
 		elementsToImport.addAll(dataType.innerDeclaration_CompositeDataType.map[it.datatype_InnerDeclaration].dataTypesToImport)
 		return elementsToImport
@@ -155,7 +155,7 @@ class PCM2JavaGeneratorHeadAndImports {
 	 * @return an iterable object of types that are necessary to import
 	 * @throws UnsupportedGeneratorInput if it is not possible to generate the necessary imports for the given entity
 	 */
-	private def dispatch Iterable<Object> getElementsToImport(OperationInterface iface) {
+	def dispatch Iterable<Object> getElementsToImport(OperationInterface iface) {
 		return getTypesUsedInSignaturesOfProvidedServices(iface)
 	}
 	
@@ -184,7 +184,7 @@ class PCM2JavaGeneratorHeadAndImports {
 	 * @return an iterable object of elements that are necessary to import
 	 * @throws UnsupportedGeneratorInput if it is not possible to generate the necessary imports for the given entity
 	 */
-	private def dispatch Iterable<Object> getElementsToImport(BasicComponent bc) {
+	def dispatch Iterable<Object> getElementsToImport(BasicComponent bc) {
 		val elementsToImport = new HashSet<Object>()
 		elementsToImport.addAll(bc.getProvidedInterfaces)
 		elementsToImport.addAll(bc.getRequiredInterfaces)

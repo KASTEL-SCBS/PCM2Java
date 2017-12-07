@@ -35,10 +35,10 @@ class DataTypeUtil {
 	 */
 	static dispatch def String getClassNameOfDataType(CollectionDataType dataType) {
 		val innerType = dataType.innerType_CollectionDataType
-		switch innerType {
-			case CollectionDataType: return "Iterable<" + (innerType as NamedElement).entityName + ">"
-			case null: return "Iterable<Object>"
-			default: return "Iterable<" + innerType.getClassNameOfDataType.primitiveToReferenceName + ">"
+		switch innerType { // TODO: Iterables instead of arrays as possibility
+			case CollectionDataType: return (innerType as NamedElement).entityName + "[]"
+			case null: return "Object[]"
+			default: return innerType.getClassNameOfDataType + "[]"
 		}
 	}
 	

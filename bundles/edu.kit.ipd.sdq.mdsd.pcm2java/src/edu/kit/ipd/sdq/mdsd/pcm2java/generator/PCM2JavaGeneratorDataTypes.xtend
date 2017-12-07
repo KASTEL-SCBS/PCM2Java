@@ -176,9 +176,9 @@ class PCM2JavaGeneratorDataTypes {
 	private dispatch def String generateConstructorCall(CollectionDataType dataType) {
 		val innerType = dataType.innerType_CollectionDataType
 		if (innerType !== null) {
-			return '''new ArrayList<«dataType.innerType_CollectionDataType.getClassNameOfDataType.primitiveToReferenceName»>();«newLine»'''
+			return '''new «dataType.innerType_CollectionDataType.getClassNameOfDataType»[0];«newLine»'''
 		} else {
-			return '''new ArrayList<Object>();«newLine»'''
+			return '''Object[];«newLine»'''
 		}
 	}
 	

@@ -139,10 +139,10 @@ class PCM2JavaGeneratorHeadAndImports {
 	private def Iterable<Object> getDataTypesToImport(Iterable<DataType> dataTypes) {
 		val dataTypesToImport = new HashSet<Object>
 		dataTypesToImport.addAll(dataTypes.filter(CompositeDataType))
-		if (dataTypes.filter(CollectionDataType).length != 0) {
+	/* 	if (dataTypes.filter(CollectionDataType).length != 0) {
 			dataTypesToImport.add(Iterable)
 			dataTypesToImport.add(ArrayList)
-		}
+		} */
 		dataTypesToImport.addAll(dataTypes.filter(CollectionDataType).getInnerTypes.filter(CompositeDataType))
 		return dataTypesToImport
 	}

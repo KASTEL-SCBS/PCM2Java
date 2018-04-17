@@ -18,9 +18,13 @@ import static extension edu.kit.ipd.sdq.commons.util.org.palladiosimulator.pcm.c
 import static extension edu.kit.ipd.sdq.commons.util.org.palladiosimulator.pcm.repository.BasicComponentUtil.*
 import static extension edu.kit.ipd.sdq.mdsd.pcm2java.util.PCM2JavaTargetNameUtil.*
 import org.palladiosimulator.pcm.core.entity.Entity
+import java.util.Collection
 
 /**
- *  This class is used to generate imports and a head in Java source code for PCM entities.
+ *  This class is used to generate imports and a head for Java classes that represent PCM entities.
+ * 
+ * @author Moritz Behr
+ * @version 0.1
  */
 class PCM2JavaGeneratorHeadAndImports {
 
@@ -139,16 +143,15 @@ class PCM2JavaGeneratorHeadAndImports {
 	private def Iterable<Object> getDataTypesToImport(Iterable<DataType> dataTypes) {
 		val dataTypesToImport = new HashSet<Object>
 		dataTypesToImport.addAll(dataTypes.filter(CompositeDataType))
-	/* 	if (dataTypes.filter(CollectionDataType).length != 0) {
-			dataTypesToImport.add(Iterable)
-			dataTypesToImport.add(ArrayList)
-		} */
+	 	if (dataTypes.filter(CollectionDataType).length != 0) {
+	 	    dataTypesToImport.addAll(getTypesRequiredForCollectionDataTypes)
+		} 
 		dataTypesToImport.addAll(dataTypes.filter(CollectionDataType).getInnerTypes.filter(CompositeDataType))
 		return dataTypesToImport
 	}
 	
 	/**
-	 * Returns all necessary elements to import for the given entity.
+	 * Returns all necessary elements to import in a Java file representing the given entity.
 	 * The given entity should be a PCM composite data type, - operation interface, or - basic component.
 	 * 
 	 * @param entity a PCM entity
@@ -166,7 +169,7 @@ class PCM2JavaGeneratorHeadAndImports {
 	 * @param iface a PCM operation interface
 	 * @return an iterable object containing all types that must be imported
 	 */
-	private def Iterable<Object> getTypesUsedInSignaturesOfProvidedServices(OperationInterface iface) {
+	protected def Iterable<Object> getTypesUsedInSignaturesOfProvidedServices(OperationInterface iface) {
 		val usedTypes =  new HashSet<Object>
 		for (providedSignature : iface.signatures__OperationInterface) {
 			usedTypes.addAll(getDataTypesToImport(#{providedSignature.returnType__OperationSignature}))
@@ -241,5 +244,18 @@ class PCM2JavaGeneratorHeadAndImports {
 	 */
 	private dispatch def String generateImport(Class<?> c) '''import «c.name»;
 	'''
+	
+	/**
+	 * Returns a list of types that are needed for using collection data types (e.g. these must be imported).
+	 * This is necessary as collection data types are not represented by classes in Java code but rather by some sort of collection of the respectable inner type.
+	 * 
+	 * @return a list of types that are necessary for using collection data types 
+	 */
+	protected def Collection<Object> getTypesRequiredForCollectionDataTypes() {
+	    val types = new ArrayList<Object>
+	    types.add(Iterable)
+	    types.add(ArrayList)
+	    return types
+	}
 	
 }

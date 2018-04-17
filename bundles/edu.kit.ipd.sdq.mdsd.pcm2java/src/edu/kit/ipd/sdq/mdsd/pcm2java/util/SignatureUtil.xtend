@@ -4,6 +4,9 @@ import org.palladiosimulator.pcm.repository.Signature
 
 /**
  * A utility class providing extension methods for Signatures
+ * 
+ * @author Moritz Behr
+ * @version 0.1
  */
 class SignatureUtil {
 	

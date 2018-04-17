@@ -3,7 +3,10 @@ package edu.kit.ipd.sdq.mdsd.pcm2java.util
 import org.palladiosimulator.pcm.repository.Parameter
 
 /**
- * A utility class providing utility extension methods for Parameters
+ * A utility class providing utility extension methods for Parameters.
+ * 
+ * @author Moritz Behr
+ * @version 0.1
  */
 class ParameterUtil {
 	

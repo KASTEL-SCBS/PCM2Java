@@ -14,6 +14,8 @@ import org.palladiosimulator.pcm.repository.BasicComponent
 /**
  * A utility class for getting target names during PCM2Java code generation
  * 
+ * @author Moritz Behr
+ * @version 0.1
  */
 class PCM2JavaTargetNameUtil {
 	

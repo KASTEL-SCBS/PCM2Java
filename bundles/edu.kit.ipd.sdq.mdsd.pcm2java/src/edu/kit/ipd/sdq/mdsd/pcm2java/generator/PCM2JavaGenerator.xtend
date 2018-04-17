@@ -15,7 +15,10 @@ import static edu.kit.ipd.sdq.mdsd.pcm2java.util.PCM2JavaTargetNameUtil.*
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceUtil.*
 
 /**
- * This class is used to generate Java source code from PCM Models.
+ * This class is used to generate Java source code from PCM models.
+ * 
+ * @author Moritz Behr
+ * @version 0.1
  */
 class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 		
@@ -104,10 +107,23 @@ class PCM2JavaGenerator extends AbstractEcore2TxtGenerator {
 		}
 	}
 	
+	/**
+	 * Gemerates content for an unexpected type of EObject.
+	 * As this is not necessary for plain Java code generation from a PCM model this returns an empty string.
+	 * 
+	 * @param element an EObject
+	 * @return emptty string
+	 */
 	protected def String generateContentUnexpectedEObject(EObject element) {
 		 "" //		"Cannot generate content for generic EObject '" + object + "'!"
 	}
 	
+	/**
+     * Generates content that is needed besides the generated Java code from a PCM model.
+     * As there is no need for additional content for plain Java code generation, nothing is added.
+     * 
+     * @param contentsForFolderAndFileNames the list to which the additional contents will be added, remains untouched.
+     */
 	protected def void generateAndAddOptionalContents(List<Triplet<String,String,String>> contentsForFolderAndFileNames) {
 		// No optional content needed for plain pcm2java
 	}

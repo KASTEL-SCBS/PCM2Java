@@ -1,14 +1,17 @@
 package edu.kit.ipd.sdq.mdsd.pcm2java.util
 
-import org.palladiosimulator.pcm.core.entity.NamedElement
 import org.palladiosimulator.pcm.repository.CollectionDataType
 import org.palladiosimulator.pcm.repository.CompositeDataType
 import org.palladiosimulator.pcm.repository.PrimitiveDataType
 
 import static edu.kit.ipd.sdq.mdsd.pcm2java.util.PCM2JavaTargetNameUtil.*
+import org.palladiosimulator.pcm.repository.DataType
 
 /**
  * A utility class providing utility extension methods for PCM data types.
+ * 
+ * @author Moritz Behr
+ * @version 0.1
  */
 class DataTypeUtil {
 	
@@ -34,12 +37,11 @@ class DataTypeUtil {
 	 * @returns class name as used in Java code for the given collection data type.
 	 */
 	static dispatch def String getClassNameOfDataType(CollectionDataType dataType) {
-		val innerType = dataType.innerType_CollectionDataType
-		switch innerType { // TODO: Iterables instead of arrays as possibility
-			case CollectionDataType: return (innerType as NamedElement).entityName + "[]"
-			case null: return "Object[]"
-			default: return innerType.getClassNameOfDataType + "[]"
-		}
+	    val innerType = dataType.innerType_CollectionDataType
+        switch innerType { // TODO: Iterables instead of arrays as possibility
+            case null:  "Iterable<Object>"
+            default: '''Iterable<«innerType.getClassNameOfDataType.primitiveToReferenceName»>'''
+        }
 	}
 	
 	/**

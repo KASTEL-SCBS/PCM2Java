@@ -18,14 +18,19 @@ import static extension edu.kit.ipd.sdq.mdsd.pcm2java.util.SignatureUtil.*
 
 /**
  * This class is used to generate Java source code for basic components and operation interfaces from PCM models.
+ * 
+ * @author Moritz Behr
+ * @version 0.1
  */
 class PCM2JavaGeneratorClassifier {
 
 	private BasicComponent bc // the basic component for which code is currently being generated 
 	protected OperationInterface iface // the operation interface for which code is currently being generated
-	protected PCM2JavaGeneratorHeadAndImports generatorHeadAndImports
+	protected PCM2JavaGeneratorHeadAndImports generatorHeadAndImports // used to generate class/interface heads and imports
 
-	
+	/**
+	 * Creates a new PCM2JavaGeneratorClassifier
+	 */
 	protected new() {
 		generatorHeadAndImports = new PCM2JavaGeneratorHeadAndImports
 	}
@@ -168,7 +173,7 @@ class PCM2JavaGeneratorClassifier {
 	 */
 	def dispatch String generateContent(OperationInterface iface) {
 		this.iface = iface
-		val importsAndClassifierHead = generatorHeadAndImports.generateImportsAndInterfaceHead(iface)
+		val importsAndClassifierHead = generateImportsAndInterfaceHead
 		val extendsRelations = generateExtendsRelations()
 		val methodDeclarations = generateMethodDeclarations()
 		this.iface = null
@@ -177,6 +182,15 @@ class PCM2JavaGeneratorClassifier {
 	«methodDeclarations»
 
 }'''
+	}
+	
+	/**
+	 * Generates imports and a head for the currently processed operation interface.
+	 * 
+	 * @return generated imports and heads
+	 */
+	protected def String generateImportsAndInterfaceHead() {
+	    generatorHeadAndImports.generateImportsAndInterfaceHead(iface)
 	}
 	
 	/**

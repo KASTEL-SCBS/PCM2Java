@@ -11,6 +11,9 @@ import java.util.List
 
 /**
  * Handler class for the PCM2Java plug-in. 
+ * 
+ * @author Moritz Behr
+ * @version 0.1
  */
 class PCM2JavaHandler extends AbstractEcoreIFile2TxtHandler {
 	
@@ -22,7 +25,7 @@ class PCM2JavaHandler extends AbstractEcoreIFile2TxtHandler {
 	override getPlugInID() '''edu.kit.idp.sdq.mdsd.pcm2java'''
 	
 	/**
-	 * Executes a PCM to java code generation.s
+	 * Executes a PCM to java code generation.
 	 */
 	override executeEcore2TxtGenerator(List<IFile> filteredSelection, ExecutionEvent event, String plugInID) throws ExecutionException {
 		Ecore2TxtUtil.generateFromSelectedFilesInFolder(filteredSelection,new PCM2JavaGeneratorModule(),new PCM2JavaGenerator(), false, false)

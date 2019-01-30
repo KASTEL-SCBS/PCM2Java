@@ -11,7 +11,7 @@
       <repositories location="https://kit-sdq.github.io/updatesite/nightly/ecore2txt" mirrorArtifacts="true">
 	<features name="edu.kit.ipd.sdq.mdsd.ecore2txt.feature.source.feature.group" versionRange="[1.0.0,2.0.0)"/>
       </repositories>
-      <repositories location="https://kit-sdq.github.io/updatesite/release/commons/" mirrorArtifacts="true">
+      <repositories location="https://kit-sdq.github.io/updatesite/release/commons/" mirrorArtifacts="false">
 	<!--<features name="edu.kit.ipd.sdq.commons.util.java.feature.feature.group" versionRange="[1.0.0,2.0.0)"/>-->
 	<features name="edu.kit.ipd.sdq.commons.util.pcm.feature.source.feature.group" versionRange="[1.0.0,2.0.0)"/>
 	<!--<features name="edu.kit.ipd.sdq.commons.util.emf.feature.feature.group" versionRange="[1.0.0,2.0.0)"/>-->

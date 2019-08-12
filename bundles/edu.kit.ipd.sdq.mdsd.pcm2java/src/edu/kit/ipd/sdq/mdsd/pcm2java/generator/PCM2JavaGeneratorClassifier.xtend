@@ -14,7 +14,7 @@ import static extension edu.kit.ipd.sdq.commons.util.org.palladiosimulator.pcm.r
 import static extension edu.kit.ipd.sdq.commons.util.org.palladiosimulator.pcm.repository.OperationInterfaceUtil.*
 import static extension edu.kit.ipd.sdq.mdsd.pcm2java.util.DataTypeUtil.*
 import static extension edu.kit.ipd.sdq.mdsd.pcm2java.util.SignatureUtil.*
-
+import org.eclipse.xtend.lib.annotations.Accessors
 
 /**
  * This class is used to generate Java source code for basic components and operation interfaces from PCM models.
@@ -23,8 +23,8 @@ import static extension edu.kit.ipd.sdq.mdsd.pcm2java.util.SignatureUtil.*
  * @version 0.1
  */
 class PCM2JavaGeneratorClassifier {
-
-	protected BasicComponent bc // the basic component for which code is currently being generated 
+	
+	@Accessors(PROTECTED_GETTER) private BasicComponent bc // the basic component for which code is currently being generated 
 	protected OperationInterface iface // the operation interface for which code is currently being generated
 	protected PCM2JavaGeneratorHeadAndImports generatorHeadAndImports // used to generate class/interface heads and imports
 

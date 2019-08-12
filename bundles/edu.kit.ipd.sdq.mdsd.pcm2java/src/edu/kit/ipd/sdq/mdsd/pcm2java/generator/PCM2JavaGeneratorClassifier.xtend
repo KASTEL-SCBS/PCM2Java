@@ -24,7 +24,7 @@ import static extension edu.kit.ipd.sdq.mdsd.pcm2java.util.SignatureUtil.*
  */
 class PCM2JavaGeneratorClassifier {
 
-	private BasicComponent bc // the basic component for which code is currently being generated 
+	protected BasicComponent bc // the basic component for which code is currently being generated 
 	protected OperationInterface iface // the operation interface for which code is currently being generated
 	protected PCM2JavaGeneratorHeadAndImports generatorHeadAndImports // used to generate class/interface heads and imports
 

@@ -4,26 +4,39 @@
       label="pcm2java"
       version="1.0.0.qualifier"
       provider-name="SDQ">
+
    <description url="https://github.com/kit-sdq/PCM2Java">
-      Generate Java code for Palladio software architecture models 
+      Generate Java code for Palladio software architecture models
    </description>
+
    <copyright url="http://www.example.com/copyright">
       [TODO Enter Copyright Description here.]
    </copyright>
+
    <license url="http://www.example.com/license">
       [TODO Enter License Description here.]
    </license>
+
    <requires>
-      <import feature="org.eclipse.xtend.source"/>
       <import feature="edu.kit.ipd.sdq.mdsd.ecore2txt.feature.source" version="1.0.0" match="greaterOrEqual"/>
       <import feature="edu.kit.ipd.sdq.commons.util.pcm.feature.source" version="1.0.0" match="greaterOrEqual"/>
-      <import feature="org.palladiosimulator.pcm" version="4.0.1" match="greaterOrEqual"/>
-      <import feature="org.palladiosimulator.editors" version="4.0.1" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.xtend.lib"/>
+      <import plugin="org.eclipse.xtext.generator"/>
+      <import plugin="org.eclipse.emf.mwe2.launch"/>
+      <import plugin="org.palladiosimulator.pcm" version="4.1.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.xtext.builder"/>
+      <import plugin="edu.kit.ipd.sdq.mdsd.ecore2txt"/>
+      <import plugin="edu.kit.ipd.sdq.commons.util.java"/>
+      <import plugin="edu.kit.ipd.sdq.commons.util.pcm"/>
+      <import plugin="edu.kit.ipd.sdq.commons.util.emf"/>
    </requires>
+
    <plugin
          id="edu.kit.ipd.sdq.mdsd.pcm2java"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
 </feature>

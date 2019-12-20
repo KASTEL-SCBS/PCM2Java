@@ -8,7 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.xtend.lib,
  org.eclipse.xtext.generator,
  org.eclipse.emf.mwe2.launch,
- org.palladiosimulator.pcm;bundle-version="4.1.0",
+ org.palladiosimulator.pcm,
  org.eclipse.ui,
  org.eclipse.xtext.builder,
  edu.kit.ipd.sdq.mdsd.ecore2txt,

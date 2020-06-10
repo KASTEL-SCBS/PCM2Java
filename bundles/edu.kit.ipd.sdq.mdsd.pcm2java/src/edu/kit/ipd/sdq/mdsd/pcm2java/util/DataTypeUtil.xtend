@@ -75,4 +75,25 @@ class DataTypeUtil {
 		}
 	}
 	
+	static def getStandardValue(DataType dataType){
+		switch dataType{
+			PrimitiveDataType: return getStandardValue(dataType)
+			default: return "null"
+		}
+	}
+	
+	static def getStandardValue(PrimitiveDataType dataType){
+		switch PCM2JavaTargetNameUtil.getTargetFileName(dataType) {
+			case "int": return "0"
+			case "byte": return "0"
+			case "short": return "0"
+			case "long": return "0L"
+			case "float": return "0.0f"
+			case "double": return "0.0d"
+			case "char": return  "''"
+			case "boolean": return "false"
+			case "String": return "null"
+		}
+ 	}
+	
 }

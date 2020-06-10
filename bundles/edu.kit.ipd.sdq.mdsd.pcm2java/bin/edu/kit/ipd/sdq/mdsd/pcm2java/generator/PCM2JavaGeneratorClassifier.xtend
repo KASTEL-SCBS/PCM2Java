@@ -23,18 +23,20 @@ import org.eclipse.xtend.lib.annotations.Accessors
  * @version 0.1
  */
 class PCM2JavaGeneratorClassifier {
-	
+
 	@Accessors(PROTECTED_GETTER) private BasicComponent bc // the basic component for which code is currently being generated 
 	protected OperationInterface iface // the operation interface for which code is currently being generated
 	protected PCM2JavaGeneratorHeadAndImports generatorHeadAndImports // used to generate class/interface heads and imports
+	protected PCM2JavaGeneratorMethodBody generatorMethodBody;
 
 	/**
 	 * Creates a new PCM2JavaGeneratorClassifier
 	 */
 	protected new() {
 		generatorHeadAndImports = new PCM2JavaGeneratorHeadAndImports
+		generatorMethodBody = new PCM2JavaGeneratorMethodBody
 	}
-	
+
 	/**
 	 * Generates Java source code for a given PCM basic component.
 	 * A Java class will be generated that represents the given PCM basic component as good as possible without additional information.
@@ -57,9 +59,9 @@ class PCM2JavaGeneratorClassifier {
 	«constructor»
 	
 	«methods»
-}'''	
+}'''
 	}
-	
+
 	/**
 	 * Generates method definitions for all methods declared in interfaces that are implemented by the currently processed basic component.
 	 * This includes inherited method declarations.
@@ -68,14 +70,17 @@ class PCM2JavaGeneratorClassifier {
 	 * @return the generated method definitions
 	 */
 	private def generateMethodDefinitions() {
-		var methodDefinitions = generateMethodDefinitions(bc.providedRoles_InterfaceProvidingEntity.filter(OperationProvidedRole).map[it.providedInterface__OperationProvidedRole].map[it.signatures__OperationInterface].flatten).toString
+		var methodDefinitions = generateMethodDefinitions(
+			bc.providedRoles_InterfaceProvidingEntity.filter(OperationProvidedRole).map [
+				it.providedInterface__OperationProvidedRole
+			].map[it.signatures__OperationInterface].flatten).toString
 		val inheritedInterfaces = bc.getAllInheritedOperationInterfaces
 		for (iface : inheritedInterfaces) {
 			methodDefinitions += generateMethodDefinitions(iface.signatures__OperationInterface)
 		}
 		return methodDefinitions
 	}
-	
+
 	/**
 	 * Generates method definitions for all given operation signatures.
 	 * The definitions are, however, only auto-generated method stubs as a real implementation cannot be generated without additional information.
@@ -83,33 +88,24 @@ class PCM2JavaGeneratorClassifier {
 	 * @param operationSignatures an Iterable object of OperationSignatures
 	 * @return the generated method definitions
 	 */
-	private def generateMethodDefinitions(Iterable<OperationSignature> operationSignatures) '''«
-		FOR operationSignature : operationSignatures 
-			SEPARATOR '{
-	// TODO: implement and verify auto-generated method stub
-	throw new UnsupportedOperationException("TODO: auto-generated method stub");
-}
-
-'
-			AFTER '{
-	// TODO: implement and verify auto-generated method stub
-	throw new UnsupportedOperationException("TODO: auto-generated method stub");
-}
-
-'	»
-	«generateCommentariesForMethod(operationSignature)»
-	public «generateMethodDeclarationWithoutSemicolon(operationSignature)»«
-		ENDFOR 
-	»
+	private def generateMethodDefinitions(
+		Iterable<OperationSignature> operationSignatures) '''«FOR operationSignature : operationSignatures»
+	«generateCommentsForMethod(operationSignature)»
+	public «generateMethodDeclarationWithoutSemicolon(operationSignature)»{
+		«generatorMethodBody.generateMethodBody(bc, operationSignature)»
+	}
+	 
+	«ENDFOR»
 	'''
+
 	
-	
+
 	/**
 	 * Generates commentaries for the given operation signature. 
 	 * This method serves as a hook for possible extensions for providision of commentaries (e.g. Javadoc) or annotations and therefore returns an empty string.  
 	 */
-	protected def String generateCommentariesForMethod(OperationSignature signature) {
-		return ""  
+	protected def String generateCommentsForMethod(OperationSignature signature) {
+		return ""
 	}
 
 	/**
@@ -125,36 +121,25 @@ class PCM2JavaGeneratorClassifier {
 		}
 		return "void"
 	}
-		
+
 	/**
 	 * Generates a string describing the "implements" relations of the currently processed basic component.
 	 * The returned string starts with "implements " followed by the names of all implemented operation interfaces, separated by a comma.
 	 * 
 	 * @return the generated implements statement
 	 */
-	private def generateImplementsRelations() '''«
-	FOR providedInterface :bc.getProvidedInterfaces()
-		BEFORE 'implements '
-		SEPARATOR ', '
-		AFTER ' '
-		»«providedInterface.entityName»«
-	ENDFOR»'''
-	
+	private def generateImplementsRelations() '''«FOR providedInterface : bc.getProvidedInterfaces() BEFORE 'implements ' SEPARATOR ', ' AFTER ' '»«providedInterface.entityName»«ENDFOR»'''
+
 	/**
 	 * Generates field declarations for every required interfaces declared in the currently processed basic component.
 	 * The generated fields are private.
 	 * 
 	 * @return the generated field declarations
 	 */
-	private def generateFields() '''«
-	FOR iface : bc.getRequiredInterfaces()
-		BEFORE '
-'
-		SEPARATOR '
-'
-		»private «iface.entityName» «iface.entityName.toFirstLower»;«
-	ENDFOR»''' 
-	
+	private def generateFields() '''«FOR iface : bc.getRequiredInterfaces() BEFORE '
+' SEPARATOR '
+'»private «iface.entityName» «iface.entityName.toFirstLower»;«ENDFOR»'''
+
 	/**
 	 * Generates a constructor method for the currently processed basic component.
 	 * The generated methods will have a parameter for every required interface of the component.
@@ -163,17 +148,15 @@ class PCM2JavaGeneratorClassifier {
 	 * @return the generated constructor
 	 */
 	private def generateConstructor() '''
-	public «bc.entityName»(«
-	FOR iface2 : bc.getRequiredInterfaces() // generate parameter list
-		SEPARATOR ", "
-		»«iface2.entityName» «iface2.entityName.toFirstLower
+	public «bc.entityName»(«FOR iface2 : bc.getRequiredInterfaces() // generate parameter list
+	SEPARATOR ", "»«iface2.entityName» «iface2.entityName.toFirstLower
 	»«ENDFOR») {
 		// TODO: implement and verify auto-generated constructor.
 	«FOR iface : bc.getRequiredInterfaces() // generate field assignments
-		»    this.«iface.entityName.toFirstLower» = «iface.entityName.toFirstLower»;
-    «ENDFOR»
+	»    this.«iface.entityName.toFirstLower» = «iface.entityName.toFirstLower»;
+		«ENDFOR»
 	}'''
-	
+
 	/**
 	 * Generates Java source code for a given PCM operation interface.
 	 * A Java interface will be generated that represents the given PCM operation interface.
@@ -193,53 +176,40 @@ class PCM2JavaGeneratorClassifier {
 
 }'''
 	}
-	
+
 	/**
 	 * Generates imports and a head for the currently processed operation interface.
 	 * 
 	 * @return generated imports and heads
 	 */
 	protected def String generateImportsAndInterfaceHead() {
-	    generatorHeadAndImports.generateImportsAndInterfaceHead(iface)
+		generatorHeadAndImports.generateImportsAndInterfaceHead(iface)
 	}
-	
+
 	/**
 	 * Generates a string describing the "extends" relations of the currently processed operation interface.
 	 * The returned string starts with "extends " followed by the names of all inherited operation interfaces, separated by a comma.
 	 * 
 	 * @return the generated extends statement
 	 */
-	private def generateExtendsRelations() '''«
-	FOR providedInterface : iface.getAllInheritedOperationInterfaces
-		BEFORE 'extends '
-		SEPARATOR ', '
-		AFTER ' '
-		»«providedInterface.entityName»«
-	ENDFOR»'''
-	
+	private def generateExtendsRelations() '''«FOR providedInterface : iface.getAllInheritedOperationInterfaces BEFORE 'extends ' SEPARATOR ', ' AFTER ' '»«providedInterface.entityName»«ENDFOR»'''
+
 	/**
 	 * Generates method declarations for all operation signatures of the currently processed operation interface.
 	 * 
 	 * @return the generated method declarations
 	 */
-	private def generateMethodDeclarations() '''«
-		FOR operationSignature : iface.signatures__OperationInterface
-			SEPARATOR "; " + newLine
-			AFTER "; " + newLine
-			»«generateMethodDeclaration(operationSignature)»«
-		ENDFOR 
-	»'''
-	
+	private def generateMethodDeclarations() '''«FOR operationSignature : iface.signatures__OperationInterface SEPARATOR "; " + newLine AFTER "; " + newLine»«generateMethodDeclaration(operationSignature)»«ENDFOR»'''
+
 	/**
 	 * Generates a method declaration for the given operation signature.
 	 * 
 	 * @param operationSignature a PCM operation signature
 	 * @return the generated method declaration
 	 */
-	protected def generateMethodDeclaration(OperationSignature operationSignature) '''«
-		generateMethodDeclarationWithoutSemicolon(operationSignature)
-	»'''
-		
+	protected def generateMethodDeclaration(
+		OperationSignature operationSignature) '''«generateMethodDeclarationWithoutSemicolon(operationSignature)»'''
+
 	/**
 	 * Generates a method declaration for the given operation signature without a final semicolon.
 	 * 
@@ -247,14 +217,10 @@ class PCM2JavaGeneratorClassifier {
 	 * @return the generated method declaration
 	 */
 	protected def String generateMethodDeclarationWithoutSemicolon(OperationSignature operationSignature) {
-				val returnType = operationSignature.returnType__OperationSignature.generateReturnType
-				val methodName = operationSignature.getMethodName
-				val parameterDeclarations = '''«
-				FOR parameter : operationSignature.parameters__OperationSignature
-					SEPARATOR ', '
-»«parameter.dataType__Parameter.getClassNameOfDataType» «parameter.getParameterName»«
-				ENDFOR»'''
-				return '''«returnType» «methodName»(«parameterDeclarations»)'''
+		val returnType = operationSignature.returnType__OperationSignature.generateReturnType
+		val methodName = operationSignature.getMethodName
+		val parameterDeclarations = '''«FOR parameter : operationSignature.parameters__OperationSignature SEPARATOR ', '»«parameter.dataType__Parameter.getClassNameOfDataType» «parameter.getParameterName»«ENDFOR»'''
+		return '''«returnType» «methodName»(«parameterDeclarations»)'''
 	}
-	
+
 }

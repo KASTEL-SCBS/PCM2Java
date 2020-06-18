@@ -8,9 +8,7 @@ import org.palladiosimulator.pcm.seff.StopAction
 import org.palladiosimulator.pcm.seff.AbstractAction
 import org.palladiosimulator.pcm.seff.ExternalCallAction
 import edu.kit.ipd.sdq.mdsd.pcm2java.util.DataTypeUtil
-import org.palladiosimulator.pcm.repository.DataType
-import org.palladiosimulator.pcm.repository.PrimitiveDataType
-import edu.kit.ipd.sdq.mdsd.pcm2java.util.PCM2JavaTargetNameUtil
+
 
 class PCM2JavaGeneratorMethodBody {
 	
@@ -64,9 +62,18 @@ class PCM2JavaGeneratorMethodBody {
 
 	private def processAction(ExternalCallAction action) {
 		var calledExternalService = action.calledService_ExternalService;
+		var returnType = calledExternalService.returnType__OperationSignature;
+		var variableAssignment = "";
+		if(returnType !== null){
+			var dataTypeNameOfReturn = DataTypeUtil.getClassNameOfDataType(returnType);
+			var variableName = "callResultOf" + calledExternalService.entityName;
+			variableAssignment = '''«dataTypeNameOfReturn» «variableName» = '''
+		} 
+		
+		
 		return '''
 		//TODO: Auto-Generated Method Call, correct arguments have to be provided
-		«DataTypeUtil.getClassNameOfDataType(calledExternalService.returnType__OperationSignature)» callResult = «calledExternalService.interface__OperationSignature.entityName.toFirstLower».«calledExternalService.entityName»(«generateDummyArguments(calledExternalService)»)'''
+		«variableAssignment»«calledExternalService.interface__OperationSignature.entityName.toFirstLower».«calledExternalService.entityName»(«generateDummyArguments(calledExternalService)»);'''
 	}
 	
 	private def generateDummyArguments(OperationSignature signature){
@@ -74,8 +81,16 @@ class PCM2JavaGeneratorMethodBody {
 	}
 	
 	private def processAction(StopAction action){
-		return '''//TODO: replace auto-generated return expression
+		
+		var returnClause = "";
+		
+		if(currentProccessingSignature.returnType__OperationSignature !== null){
+			returnClause = '''//TODO: replace auto-generated return expression
 return «DataTypeUtil.getStandardValue(currentProccessingSignature.returnType__OperationSignature)»'''
+		}
+		
+		return returnClause;
+		
 	}
 	
 	
